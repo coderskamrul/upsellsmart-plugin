@@ -1,0 +1,219 @@
+/* Frontend styles for recommendations */
+.upspr-campaign {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.upspr-campaign-title {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.upspr-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.upspr-layout-grid .upspr-products {
+  display: grid;
+  gap: 20px;
+}
+
+.upspr-columns-2 .upspr-products {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.upspr-columns-3 .upspr-products {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.upspr-columns-4 .upspr-products {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.upspr-columns-5 .upspr-products {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.upspr-layout-slider .upspr-products {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.upspr-layout-slider .upspr-product {
+  flex: 0 0 250px;
+  scroll-snap-align: start;
+}
+
+.upspr-product {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upspr-product:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.upspr-product-image {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.upspr-product-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.upspr-product-image img.lazy {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.upspr-product-image img:not(.lazy) {
+  opacity: 1;
+}
+
+.upspr-product-title {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.upspr-product-title a {
+  color: #333;
+  text-decoration: none;
+}
+
+.upspr-product-title a:hover {
+  color: #0073aa;
+}
+
+.upspr-product-price {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0073aa;
+}
+
+.upspr-product-rating {
+  margin-bottom: 15px;
+}
+
+.upspr-product-actions {
+  text-align: center;
+}
+
+.upspr-product-actions .button,
+.upspr-product-actions .add_to_cart_button {
+  width: 100%;
+  padding: 10px 15px;
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+.upspr-product-actions .button:hover,
+.upspr-product-actions .add_to_cart_button:hover {
+  background: #005a87;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .upspr-columns-4 .upspr-products,
+  .upspr-columns-5 .upspr-products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .upspr-columns-3 .upspr-products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .upspr-campaign {
+    padding: 15px;
+  }
+
+  .upspr-campaign-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .upspr-columns-2 .upspr-products,
+  .upspr-columns-3 .upspr-products,
+  .upspr-columns-4 .upspr-products,
+  .upspr-columns-5 .upspr-products {
+    grid-template-columns: 1fr;
+  }
+
+  .upspr-layout-slider .upspr-product {
+    flex: 0 0 200px;
+  }
+}
+
+/* Loading states */
+.upspr-campaign.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.upspr-campaign.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #0073aa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Campaign type specific styles */
+.upspr-campaign[data-campaign-type="upsell"] {
+  border-left: 4px solid #00a32a;
+}
+
+.upspr-campaign[data-campaign-type="cross_sell"] {
+  border-left: 4px solid #0073aa;
+}
+
+.upspr-campaign[data-campaign-type="bundle"] {
+  border-left: 4px solid #ff6900;
+}
+
+.upspr-campaign[data-campaign-type="personalized"] {
+  border-left: 4px solid #9b51e0;
+}
+
+.upspr-campaign[data-campaign-type="behavioral"] {
+  border-left: 4px solid #f56565;
+}

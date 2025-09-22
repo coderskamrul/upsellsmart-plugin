@@ -1,0 +1,238 @@
+/*!**********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/frontend/styles/frontend.scss ***!
+  \**********************************************************************************************************************************************************************/
+/**
+ * Frontend styles for UpsellSmart Product Recommendations
+ * WordPress-compatible styles that won't conflict with theme styles
+ */
+/* Recommendations container */
+.upspr-recommendations-container {
+  margin: 2rem 0;
+  clear: both;
+}
+
+.upspr-recommendations-wrapper {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.upspr-recommendations-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #333;
+  text-align: center;
+}
+
+/* Recommendations grid */
+.upspr-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .upspr-recommendations-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+}
+/* Individual recommendation item */
+.upspr-recommendation-item {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.upspr-recommendation-item:hover {
+  border-color: #0073aa;
+  box-shadow: 0 2px 8px rgba(0, 115, 170, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Product image */
+.upspr-product-image {
+  margin-bottom: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.upspr-product-image img {
+  width: 100%;
+  height: 180px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  transition: transform 0.3s ease;
+  border-radius: 4px;
+}
+
+.upspr-recommendation-item:hover .upspr-product-image img {
+  transform: scale(1.05);
+}
+
+/* Product details */
+.upspr-product-details {
+  padding: 0.5rem 0;
+}
+
+.upspr-product-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  height: 2.8rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.upspr-product-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0073aa;
+  margin-bottom: 0.75rem;
+}
+
+.upspr-product-price .woocommerce-Price-amount {
+  color: inherit;
+}
+
+.upspr-product-price del {
+  color: #999;
+  font-weight: normal;
+  margin-right: 0.5rem;
+}
+
+/* Add to cart button */
+.upspr-add-to-cart {
+  background: #0073aa;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-decoration: none;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.upspr-add-to-cart:hover {
+  background: #005a87;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.upspr-add-to-cart:active {
+  transform: translateY(0);
+}
+
+.upspr-add-to-cart:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading state */
+.upspr-recommendations-container.loading {
+  position: relative;
+  min-height: 200px;
+}
+
+.upspr-recommendations-container.loading::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0073aa;
+  border-radius: 50%;
+  animation: upspr-spin 1s linear infinite;
+}
+
+@keyframes upspr-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* Error state */
+.upspr-error {
+  background: #ffeaea;
+  border: 1px solid #ff6b6b;
+  color: #d63031;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* Hide when no recommendations */
+.upspr-recommendations-container:empty,
+.upspr-recommendations-container[style*="display: none"] {
+  display: none !important;
+}
+
+/* WordPress theme compatibility */
+.single-product .upspr-recommendations-container {
+  margin-top: 2rem;
+  clear: both;
+}
+
+.shop .upspr-recommendations-container,
+.archive .upspr-recommendations-container {
+  margin: 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .upspr-recommendations-wrapper {
+    padding: 1rem;
+  }
+  .upspr-recommendations-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .upspr-product-image img {
+    height: 150px;
+  }
+  .upspr-product-title {
+    font-size: 0.9rem;
+  }
+  .upspr-add-to-cart {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+/* Print styles */
+@media print {
+  .upspr-recommendations-container {
+    display: none;
+  }
+}
+
+/*# sourceMappingURL=frontend.css.map*/
