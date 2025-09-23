@@ -1,9 +1,15 @@
 "use client"
 
+import KeywordSelector from '../KeywordSelector'
+
 const AmplifiersStep = ({ formData, updateFormData }) => {
   const handleArrayUpdate = (field, value) => {
     const values = value.split(',').map(v => v.trim()).filter(v => v)
     updateFormData(field, values)
+  }
+
+  const handleKeywordChange = (keywords) => {
+    updateFormData('trendingKeywords', keywords)
   }
 
   return (
@@ -139,18 +145,12 @@ const AmplifiersStep = ({ formData, updateFormData }) => {
 
         {formData.seasonalTrendingBoost && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Trending Keywords
-              </label>
-              <input
-                type="text"
-                placeholder="summer, sale, trending"
-                value={formData.trendingKeywords.join(', ')}
-                onChange={(e) => handleArrayUpdate('trendingKeywords', e.target.value)}
-                className="upspr-input"
-              />
-            </div>
+            <KeywordSelector
+              selectedKeywords={formData.trendingKeywords || []}
+              onKeywordChange={handleKeywordChange}
+              placeholder="summer, sale, trending"
+              label="Trending Keywords"
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

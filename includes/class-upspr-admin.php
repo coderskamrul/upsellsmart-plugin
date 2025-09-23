@@ -35,6 +35,8 @@ class UPSPR_Admin {
         add_action( 'wp_ajax_upspr_get_brands', array( $this, 'ajax_get_brands' ) );
         add_action( 'wp_ajax_upspr_get_attributes', array( $this, 'ajax_get_attributes' ) );
         add_action( 'wp_ajax_upspr_get_products', array( $this, 'ajax_get_products' ) );
+        add_action( 'wp_ajax_upspr_get_countries', array( $this, 'ajax_get_countries' ) );
+        add_action( 'wp_ajax_upspr_get_states', array( $this, 'ajax_get_states' ) );
     }
 
     /**
@@ -90,7 +92,7 @@ class UPSPR_Admin {
         // Add AJAX nonce for category fetching
         wp_localize_script( 'upspr-admin', 'upspr_ajax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'nonce' => wp_create_nonce( 'upspr_ajax_nonce' ),
+            'nonce' => wp_create_nonce( 'upspr_admin_nonce' ),
         ) );
 
         // Add inline script to make nonce globally available
@@ -99,7 +101,7 @@ class UPSPR_Admin {
             window.wpApiSettings.nonce = "' . wp_create_nonce( 'wp_rest' ) . '";
             window.wpApiSettings.currentPage = "' . $current_page . '";
             window.upspr_ajax = window.upspr_ajax || {};
-            window.upspr_ajax.nonce = "' . wp_create_nonce( 'upspr_ajax_nonce' ) . '";
+            window.upspr_ajax.nonce = "' . wp_create_nonce( 'upspr_admin_nonce' ) . '";
         ', 'before' );
     }
 
@@ -396,5 +398,73 @@ class UPSPR_Admin {
         }
 
         wp_send_json_success( $formatted_products );
+    }
+
+    /**
+     * AJAX handler for getting countries
+     */
+    public function ajax_get_countries() {
+        // Verify nonce
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
+            wp_send_json_error( 'Invalid nonce' );
+        }
+
+        // Get WooCommerce countries
+        $countries = WC()->countries->get_countries();
+        $formatted_countries = array();
+
+        foreach ( $countries as $code => $name ) {
+            $formatted_countries[] = array(
+                'code' => $code,
+                'name' => $name
+            );
+        }
+
+        // Sort countries by name
+        usort( $formatted_countries, function( $a, $b ) {
+            return strcmp( $a['name'], $b['name'] );
+        });
+
+        wp_send_json_success( $formatted_countries );
+    }
+
+    /**
+     * AJAX handler for getting states
+     */
+    public function ajax_get_states() {
+        // Verify nonce
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
+            wp_send_json_error( 'Invalid nonce' );
+        }
+
+        $countries = isset( $_POST['countries'] ) ? sanitize_text_field( $_POST['countries'] ) : '';
+        if ( empty( $countries ) ) {
+            wp_send_json_success( array() );
+        }
+
+        $country_codes = explode( ',', $countries );
+        $all_states = array();
+
+        foreach ( $country_codes as $country_code ) {
+            $country_code = trim( $country_code );
+            $states = WC()->countries->get_states( $country_code );
+            
+            if ( ! empty( $states ) ) {
+                foreach ( $states as $state_code => $state_name ) {
+                    $all_states[] = array(
+                        'code' => $country_code . ':' . $state_code, // Store as country:state format
+                        'name' => $state_name,
+                        'country' => $country_code
+                    );
+                }
+            }
+        }
+
+        // Sort states by name
+        usort( $all_states, function( $a, $b ) {
+            return strcmp( $a['name'], $b['name'] );
+        });
+
+        wp_send_json_success( $all_states );
     }
 }

@@ -1,6 +1,25 @@
 "use client"
 
+import CountrySelector from '../CountrySelector'
+import StateSelector from '../StateSelector'
+
 const PersonalizationStep = ({ formData, updateFormData }) => {
+  console.log('PersonalizationStep rendered, formData:', formData) // Debug log
+
+  const handleCountryChange = (countryCodes, countryNames) => {
+    console.log('Country change:', countryCodes, countryNames) // Debug log
+    updateFormData('selectedCountries', countryCodes)
+    updateFormData('selectedCountryNames', countryNames)
+    // Clear states when countries change
+    updateFormData('selectedStates', [])
+    updateFormData('selectedStateNames', [])
+  }
+
+  const handleStateChange = (stateCodes, stateNames) => {
+    console.log('State change:', stateCodes, stateNames) // Debug log
+    updateFormData('selectedStates', stateCodes)
+    updateFormData('selectedStateNames', stateNames)
+  }
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -182,36 +201,22 @@ const PersonalizationStep = ({ formData, updateFormData }) => {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Geographic Location
-              </label>
-              <input
-                type="text"
-                placeholder="Country, State, or City"
-                value={formData.geographicLocation}
-                onChange={(e) => updateFormData('geographicLocation', e.target.value)}
-                className="upspr-input"
-              />
-            </div>
+            <CountrySelector
+              selectedCountries={formData.selectedCountries || []}
+              selectedCountryNames={formData.selectedCountryNames || []}
+              onCountryChange={handleCountryChange}
+              placeholder="Search and select countries..."
+              label="Country Location"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Age Group
-              </label>
-              <select
-                value={formData.ageGroup}
-                onChange={(e) => updateFormData('ageGroup', e.target.value)}
-                className="upspr-select"
-              >
-                <option value="any-age">Any age</option>
-                <option value="18-25">18-25</option>
-                <option value="26-35">26-35</option>
-                <option value="36-45">36-45</option>
-                <option value="46-55">46-55</option>
-                <option value="56+">56+</option>
-              </select>
-            </div>
+            <StateSelector
+              selectedStates={formData.selectedStates || []}
+              selectedStateNames={formData.selectedStateNames || []}
+              selectedCountries={formData.selectedCountries || []}
+              onStateChange={handleStateChange}
+              placeholder="Search and select states or cities..."
+              label="State or City Location"
+            />
           </div>
         )}
       </div>
