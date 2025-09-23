@@ -117,7 +117,7 @@ const StateSelector = ({
             <div
                 className={`min-h-[40px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-wrap items-center gap-2 ${isDisabled
                     ? 'bg-gray-50 cursor-not-allowed'
-                    : 'focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500'
+                    : 'focus-within:ring-1 focus-within:ring-green-500 focus-within:border-green-500'
                     }`}
                 onClick={() => {
                     if (!isDisabled) {

@@ -14,6 +14,9 @@ const ProductSelector = ({
     const [productSearchTerm, setProductSearchTerm] = useState('')
     const [showProductDropdown, setShowProductDropdown] = useState(false)
 
+    // Generate unique ID for this instance
+    const instanceId = useState(() => `product-selector-${Math.random().toString(36).substr(2, 9)}`)[0]
+
     // Fetch WooCommerce products
     useEffect(() => {
         if (productSearchTerm.length >= 2) {
@@ -26,14 +29,14 @@ const ProductSelector = ({
     // Handle click outside to close dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (!event.target.closest('.product-dropdown-container')) {
+            if (!event.target.closest(`.product-dropdown-container-${instanceId}`)) {
                 setShowProductDropdown(false)
             }
         }
 
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
+    }, [instanceId])
 
     const fetchProducts = async () => {
         setLoadingProducts(true)
@@ -98,16 +101,16 @@ const ProductSelector = ({
     )
 
     return (
-        <div className="relative product-dropdown-container">
+        <div className={`relative product-dropdown-container product-dropdown-container-${instanceId}`}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 {label}
             </label>
 
             {/* Multiselect Input Container */}
             <div
-                className="min-h-[40px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-wrap items-center gap-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500"
+                className="min-h-[40px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-wrap items-center gap-2 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500"
                 onClick={() => {
-                    const input = document.querySelector('.product-search-input');
+                    const input = document.querySelector(`#${instanceId}`);
                     if (input) input.focus();
                 }}
             >
@@ -135,6 +138,7 @@ const ProductSelector = ({
 
                 {/* Search Input */}
                 <input
+                    id={instanceId}
                     type="text"
                     placeholder={selectedProductNames && selectedProductNames.length > 0 ? "" : placeholder}
                     value={productSearchTerm}
@@ -143,8 +147,13 @@ const ProductSelector = ({
                         setShowProductDropdown(true)
                     }}
                     onFocus={() => setShowProductDropdown(true)}
-                    className="category-search-input product-search-input flex-1 min-w-[120px] border-none outline-none bg-transparent text-sm placeholder-gray-400 focus:shadow-none"
-                    style={{ boxShadow: 'none', border: 'none !important' }}
+                    className="flex-1 min-w-[120px] border-none outline-none bg-transparent text-sm placeholder-gray-400 focus:shadow-none"
+                    style={{
+                        border: 'none',
+                        outline: 'none',
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent'
+                    }}
                 />
             </div>
 

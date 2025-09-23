@@ -101,7 +101,7 @@ const AttributeSelector = ({
 
             {/* Multiselect Input Container */}
             <div
-                className="min-h-[40px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-wrap items-center gap-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500"
+                className="min-h-[40px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-wrap items-center gap-2 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500"
                 onClick={() => {
                     const input = document.querySelector('.attribute-search-input');
                     if (input) input.focus();

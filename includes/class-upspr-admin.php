@@ -161,7 +161,7 @@ class UPSPR_Admin {
      */
     public function ajax_get_categories() {
         // Check nonce for security
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_ajax_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 
@@ -199,7 +199,7 @@ class UPSPR_Admin {
      */
     public function ajax_get_tags() {
         // Check nonce for security
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_ajax_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 
@@ -237,7 +237,7 @@ class UPSPR_Admin {
      */
     public function ajax_get_brands() {
         // Check nonce for security
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_ajax_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 
@@ -291,7 +291,7 @@ class UPSPR_Admin {
      */
     public function ajax_get_attributes() {
         // Check nonce for security
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_ajax_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 
@@ -346,7 +346,7 @@ class UPSPR_Admin {
      */
     public function ajax_get_products() {
         // Check nonce for security
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_ajax_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 

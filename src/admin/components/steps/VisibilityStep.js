@@ -1,5 +1,8 @@
 "use client"
 
+import ProductSelector from '../ProductSelector'
+import CategorySelector from '../CategorySelector'
+
 const VisibilityStep = ({ formData, updateFormData }) => {
   const handleDayToggle = (day) => {
     updateFormData('daysOfWeek', {
@@ -39,6 +42,16 @@ const VisibilityStep = ({ formData, updateFormData }) => {
   const handleArrayUpdate = (field, value) => {
     const values = value.split(',').map(v => v.trim()).filter(v => v)
     updateFormData(field, values)
+  }
+
+  const handleRequiredProductsChange = (productIds, productNames) => {
+    updateFormData('requiredProductsInCart', productIds)
+    updateFormData('requiredProductNamesInCart', productNames)
+  }
+
+  const handleRequiredCategoriesChange = (categoryIds, categoryNames) => {
+    updateFormData('requiredCategoriesInCart', categoryIds)
+    updateFormData('requiredCategoryNamesInCart', categoryNames)
   }
 
   // Toggle Switch Component
@@ -333,31 +346,23 @@ const VisibilityStep = ({ formData, updateFormData }) => {
               />
             </div>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Required Products in Cart
-            </label>
-            <input
-              type="text"
-              placeholder="Enter product IDs (comma separated)"
-              value={formData.requiredProductsInCart.join(', ')}
-              onChange={(e) => handleArrayUpdate('requiredProductsInCart', e.target.value)}
-              className="upspr-input"
+            <ProductSelector
+              selectedProducts={formData.requiredProductsInCart || []}
+              selectedProductNames={formData.requiredProductNamesInCart || []}
+              onProductChange={handleRequiredProductsChange}
+              placeholder="Search and select required products..."
+              label="Required Products in Cart"
             />
             <p className="text-xs text-gray-500 mt-1">Show only when these products are in cart</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Required Categories in Cart
-            </label>
-            <input
-              type="text"
-              placeholder="Enter category slugs (comma separated)"
-              value={formData.requiredCategoriesInCart.join(', ')}
-              onChange={(e) => handleArrayUpdate('requiredCategoriesInCart', e.target.value)}
-              className="upspr-input"
+            <CategorySelector
+              selectedCategories={formData.requiredCategoriesInCart || []}
+              selectedCategoryNames={formData.requiredCategoryNamesInCart || []}
+              onCategoryChange={handleRequiredCategoriesChange}
+              placeholder="Search and select required categories..."
+              label="Required Categories in Cart"
             />
             <p className="text-xs text-gray-500 mt-1">Show only when products from these categories are in cart</p>
           </div>
