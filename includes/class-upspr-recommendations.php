@@ -33,6 +33,13 @@ class UPSPR_Recommendations {
     }
 
     /**
+     * Get database instance
+     */
+    private function get_database() {
+        return UPSPR_Database::get_instance();
+    }
+
+    /**
      * Initialize
      */
     private function init() {
@@ -45,18 +52,38 @@ class UPSPR_Recommendations {
      * Display product page recommendations
      */
     public function display_product_recommendations() {
-        // TODO: Implement product page recommendations
-        // This will fetch active campaigns for 'product-page' location
-        // and display recommended products
+        // Get active campaigns for product page
+        $campaigns = $this->get_campaigns_for_location( 'product-page' );
+        //echo '<pre>'; print_r('ndvhdsnv'); echo '</pre>';
+        //echo 'a<pre>'; print_r($campaigns); echo '</pre>';
+        if ( empty( $campaigns ) ) {
+            return;
+        }
+        // TODO: Process and display campaigns
+        // For now, we'll output a placeholder for each campaign
+        foreach ( $campaigns as $campaign ) {
+            echo 'a<pre>'; print_r($campaign['name']); echo '</pre>';
+            // TODO: Implement actual campaign rendering logic
+        }
     }
 
     /**
      * Display cart page recommendations
      */
     public function display_cart_recommendations() {
-        // TODO: Implement cart page recommendations
-        // This will fetch active campaigns for 'cart-page' location
-        // and display recommended products
+        // Get active campaigns for cart page
+        $campaigns = $this->get_campaigns_for_location( 'cart-page' );
+        
+        if ( empty( $campaigns ) ) {
+            return;
+        }
+
+        // TODO: Process and display campaigns
+        // For now, we'll output a placeholder for each campaign
+        foreach ( $campaigns as $campaign ) {
+            echo '<!-- UpsellSmart Campaign: ' . esc_html( $campaign['name'] ) . ' (ID: ' . intval( $campaign['id'] ) . ') -->';
+            // TODO: Implement actual campaign rendering logic
+        }
     }
 
     /**
@@ -66,5 +93,55 @@ class UPSPR_Recommendations {
         // TODO: Implement recommendation logic
         // This will use the campaign rules to generate recommendations
         return array();
+    }
+
+    /**
+     * Get all active campaigns
+     *
+     * @param string $location Optional. Filter by location (e.g., 'product-page', 'cart-page')
+     * @param string $type Optional. Filter by campaign type (e.g., 'cross-sell', 'upsell', 'related')
+     * @return array Array of active campaigns
+     */
+    public function get_active_campaigns( $location = '', $type = '' ) {
+        $database = $this->get_database();
+        
+        $args = array(
+            'status' => 'active',
+            'orderby' => 'priority',
+            'order' => 'ASC',
+            'limit' => 100 // Set a reasonable limit
+        );
+
+        // Filter by location if specified
+        if ( ! empty( $location ) ) {
+            $args['location'] = $location;
+        }
+
+        // Filter by type if specified
+        if ( ! empty( $type ) ) {
+            $args['type'] = $type;
+        }
+
+        return $database->get_campaigns( $args );
+    }
+
+    /**
+     * Get active campaigns for specific location
+     *
+     * @param string $location The location to get campaigns for
+     * @return array Array of active campaigns for the location
+     */
+    public function get_campaigns_for_location( $location ) {
+        return $this->get_active_campaigns( $location );
+    }
+
+    /**
+     * Get active campaigns by type
+     *
+     * @param string $type The campaign type to get campaigns for
+     * @return array Array of active campaigns of the specified type
+     */
+    public function get_campaigns_by_type( $type ) {
+        return $this->get_active_campaigns( '', $type );
     }
 }
