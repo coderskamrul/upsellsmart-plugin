@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Plus, Search, Eye, Target, Edit, Trash2 } from "lucide-react"
+import { useToast } from "../context/ToastContext"
+import useConfirmation from "../hooks/useConfirmation"
+import ConfirmationModal from "../ui/ConfirmationModal"
 import CreateRecommendationPage from "./CreateRecommendationPage"
 
 const RecommendationsPage = () => {
@@ -12,6 +15,8 @@ const RecommendationsPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [viewDetailsModal, setViewDetailsModal] = useState({ show: false, campaign: null })
   const [editMode, setEditMode] = useState({ show: false, campaign: null })
+  const { showSuccess, showError } = useToast()
+  const { confirmationState, hideConfirmation, confirmDelete } = useConfirmation()
 
   useEffect(() => {
     fetchRecommendations()
@@ -57,32 +62,34 @@ const RecommendationsPage = () => {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this recommendation campaign?")) {
-      return
-    }
+    // Find the campaign name for better UX
+    const campaign = recommendations.find(rec => rec.id === id)
+    const campaignName = campaign ? `"${campaign.name}"` : "this recommendation campaign"
 
-    try {
-      const response = await fetch(`/wp-json/upspr/v1/campaigns/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': window.wpApiSettings?.nonce || '',
-        },
-      })
+    confirmDelete(campaignName, async () => {
+      try {
+        const response = await fetch(`/wp-json/upspr/v1/campaigns/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': window.wpApiSettings?.nonce || '',
+          },
+        })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to delete campaign')
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Failed to delete campaign')
+        }
+
+        // Remove from local state
+        setRecommendations((prev) => prev.filter((rec) => rec.id !== id))
+
+        showSuccess("Campaign deleted successfully!")
+      } catch (error) {
+        console.error("Error deleting campaign:", error)
+        showError("Failed to delete campaign: " + error.message)
       }
-
-      // Remove from local state
-      setRecommendations((prev) => prev.filter((rec) => rec.id !== id))
-
-      alert("Campaign deleted successfully!")
-    } catch (error) {
-      console.error("Error deleting campaign:", error)
-      alert("Failed to delete campaign: " + error.message)
-    }
+    })
   }
 
   const handleViewDetails = async (id) => {
@@ -103,7 +110,7 @@ const RecommendationsPage = () => {
       setViewDetailsModal({ show: true, campaign })
     } catch (error) {
       console.error("Error fetching campaign details:", error)
-      alert("Failed to load campaign details: " + error.message)
+      showError("Failed to load campaign details: " + error.message)
     }
   }
 
@@ -127,7 +134,7 @@ const RecommendationsPage = () => {
       setEditMode({ show: true, campaign })
     } catch (error) {
       console.error("Error fetching campaign for edit:", error)
-      alert("Failed to load campaign for editing: " + error.message)
+      showError("Failed to load campaign for editing: " + error.message)
     }
   }
 
@@ -507,6 +514,18 @@ const RecommendationsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationState.isOpen}
+        onClose={hideConfirmation}
+        onConfirm={confirmationState.onConfirm}
+        title={confirmationState.title}
+        message={confirmationState.message}
+        confirmText={confirmationState.confirmText}
+        cancelText={confirmationState.cancelText}
+        type={confirmationState.type}
+      />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
+import { useToast } from "../context/ToastContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs"
 import BasicInfoStep from "../steps/BasicInfoStep"
 import FiltersStep from "../steps/FiltersStep"
@@ -11,6 +12,7 @@ import VisibilityStep from "../steps/VisibilityStep"
 
 const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false, initialData = null }) => {
   const [activeTab, setActiveTab] = useState("basic-info")
+  const { showSuccess, showError, showWarning } = useToast()
 
   // Initialize form data with existing data if in edit mode
   const getInitialFormData = () => {
@@ -260,7 +262,7 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
   const handleCreateRule = async () => {
     // Basic validation
     if (!formData.ruleName.trim()) {
-      alert("Please enter a rule name")
+      showWarning("Please enter a rule name")
       return
     }
 
@@ -387,14 +389,14 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
       console.log(`Campaign ${editMode ? 'updated' : 'created'} successfully:`, resultCampaign)
 
       // Show success message
-      alert(`Recommendation campaign ${editMode ? 'updated' : 'created'} successfully!`)
+      showSuccess(`Recommendation campaign ${editMode ? 'updated' : 'created'} successfully!`)
 
       // Call the callback with the result campaign
       onCampaignCreated(resultCampaign)
 
     } catch (error) {
       console.error(`Error ${editMode ? 'updating' : 'creating'} campaign:`, error)
-      alert(`Failed to ${editMode ? 'update' : 'create'} campaign: ` + error.message)
+      showError(`Failed to ${editMode ? 'update' : 'create'} campaign: ` + error.message)
     }
   }
 

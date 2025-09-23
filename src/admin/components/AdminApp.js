@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Toaster } from "react-hot-toast"
+import { ToastProvider } from "./context/ToastContext"
 import DashboardPage from "./pages/DashboardPage"
 import RecommendationsPage from "./pages/RecommendationsPage"
 import SettingsPage from "./pages/SettingsPage"
@@ -68,16 +70,19 @@ const AdminApp = () => {
   }
 
   return (
-    <div className="upspr-admin-wrapper min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">UpSellSmart – {getPageTitle()}</h1>
-          <p className="text-gray-600">{getPageDescription()}</p>
-        </div> */}
+    <ToastProvider>
+      <div className="upspr-admin-wrapper min-h-screen bg-white p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">UpSellSmart – {getPageTitle()}</h1>
+            <p className="text-gray-600">{getPageDescription()}</p>
+          </div> */}
 
-        {renderCurrentPage()}
+          {renderCurrentPage()}
+        </div>
       </div>
-    </div>
+      <Toaster />
+    </ToastProvider>
   )
 }
 

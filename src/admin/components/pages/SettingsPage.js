@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Save, RefreshCw, Download, Upload, AlertTriangle, CheckCircle, Info } from "lucide-react"
+import { useToast } from "../context/ToastContext"
+import useConfirmation from "../hooks/useConfirmation"
+import ConfirmationModal from "../ui/ConfirmationModal"
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -42,6 +45,8 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
   const [lastSaved, setLastSaved] = useState(null)
+  const { showSuccess, showError } = useToast()
+  const { confirmationState, hideConfirmation, showConfirmation } = useConfirmation()
 
   useEffect(() => {
     loadSettings()
@@ -63,50 +68,60 @@ const SettingsPage = () => {
       console.log("Saving settings:", settings)
       await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API call
       setLastSaved(new Date())
+      showSuccess("Settings saved successfully!")
     } catch (error) {
       console.error("Failed to save settings:", error)
+      showError("Failed to save settings: " + error.message)
     } finally {
       setSaving(false)
     }
   }
 
   const resetSettings = async () => {
-    if (confirm("Are you sure you want to reset all settings to defaults? This action cannot be undone.")) {
-      setSettings({
-        general: {
-          enable_analytics: true,
-          cache_duration: 3600,
-          max_recommendations: 10,
-          enable_mobile: true,
-          debug_mode: false,
-          auto_cleanup_days: 30,
-        },
-        display: {
-          show_prices: true,
-          show_ratings: true,
-          show_add_to_cart: true,
-          layout_style: "grid",
-          primary_color: "#22c55e",
-          border_radius: 8,
-          animation_enabled: true,
-        },
-        performance: {
-          enable_caching: true,
-          lazy_loading: true,
-          preload_images: false,
-          minify_output: true,
-          cdn_enabled: false,
-        },
-        advanced: {
-          custom_css: "",
-          custom_js: "",
-          api_rate_limit: 100,
-          webhook_url: "",
-          enable_logging: true,
-          log_level: "error",
-        },
-      })
-    }
+    showConfirmation({
+      title: "Reset Settings",
+      message: "Are you sure you want to reset all settings to defaults? This action cannot be undone.",
+      confirmText: "Reset All Settings",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        setSettings({
+          general: {
+            enable_analytics: true,
+            cache_duration: 3600,
+            max_recommendations: 10,
+            enable_mobile: true,
+            debug_mode: false,
+            auto_cleanup_days: 30,
+          },
+          display: {
+            show_prices: true,
+            show_ratings: true,
+            show_add_to_cart: true,
+            layout_style: "grid",
+            primary_color: "#22c55e",
+            border_radius: 8,
+            animation_enabled: true,
+          },
+          performance: {
+            enable_caching: true,
+            lazy_loading: true,
+            preload_images: false,
+            minify_output: true,
+            cdn_enabled: false,
+          },
+          advanced: {
+            custom_css: "",
+            custom_js: "",
+            api_rate_limit: 100,
+            webhook_url: "",
+            enable_logging: true,
+            log_level: "error",
+          },
+        })
+        showSuccess("Settings have been reset to defaults!")
+      }
+    })
   }
 
   const updateSetting = (section, key, value) => {
@@ -165,11 +180,10 @@ const SettingsPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                     ? "border-green-500 text-green-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}
@@ -565,6 +579,18 @@ const SettingsPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationState.isOpen}
+        onClose={hideConfirmation}
+        onConfirm={confirmationState.onConfirm}
+        title={confirmationState.title}
+        message={confirmationState.message}
+        confirmText={confirmationState.confirmText}
+        cancelText={confirmationState.cancelText}
+        type={confirmationState.type}
+      />
     </div>
   )
 }
