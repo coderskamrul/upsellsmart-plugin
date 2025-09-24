@@ -46,12 +46,12 @@ const VisibilityStep = ({ formData, updateFormData }) => {
 
   const handleRequiredProductsChange = (productIds, productNames) => {
     updateFormData('requiredProductsInCart', productIds)
-    updateFormData('requiredProductNamesInCart', productNames)
+    updateFormData('requiredProductsInCartNames', productNames)
   }
 
   const handleRequiredCategoriesChange = (categoryIds, categoryNames) => {
     updateFormData('requiredCategoriesInCart', categoryIds)
-    updateFormData('requiredCategoryNamesInCart', categoryNames)
+    updateFormData('requiredCategoriesInCartNames', categoryNames)
   }
 
   // Toggle Switch Component
@@ -349,7 +349,7 @@ const VisibilityStep = ({ formData, updateFormData }) => {
           <div>
             <ProductSelector
               selectedProducts={formData.requiredProductsInCart || []}
-              selectedProductNames={formData.requiredProductNamesInCart || []}
+              selectedProductNames={formData.requiredProductsInCartNames || []}
               onProductChange={handleRequiredProductsChange}
               placeholder="Search and select required products..."
               label="Required Products in Cart"
@@ -359,7 +359,7 @@ const VisibilityStep = ({ formData, updateFormData }) => {
           <div>
             <CategorySelector
               selectedCategories={formData.requiredCategoriesInCart || []}
-              selectedCategoryNames={formData.requiredCategoryNamesInCart || []}
+              selectedCategoryNames={formData.requiredCategoriesInCartNames || []}
               onCategoryChange={handleRequiredCategoriesChange}
               placeholder="Search and select required categories..."
               label="Required Categories in Cart"

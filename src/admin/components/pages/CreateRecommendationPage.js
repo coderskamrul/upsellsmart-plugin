@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { useToast } from "../context/ToastContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs"
@@ -9,6 +9,7 @@ import FiltersStep from "../steps/FiltersStep"
 import AmplifiersStep from "../steps/AmplifiersStep"
 import PersonalizationStep from "../steps/PersonalizationStep"
 import VisibilityStep from "../steps/VisibilityStep"
+import filterDataMiddleware from "../../middleware/FilterDataMiddleware"
 
 const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false, initialData = null }) => {
   const [activeTab, setActiveTab] = useState("basic-info")
@@ -19,26 +20,19 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
     if (editMode && initialData) {
       console.log("Edit mode - initialData:", initialData)
 
-      // If we have form_data, use it as the base
-      if (initialData.form_data) {
-        console.log("Using form_data:", initialData.form_data)
-        const formData = {
-          ...initialData.form_data,
-          // Ensure basic fields are populated from the campaign data (override if needed)
-          ruleName: initialData.name || initialData.form_data.ruleName || "",
-          description: initialData.description || initialData.form_data.description || "",
-          recommendationType: initialData.type || initialData.form_data.recommendationType || "",
-          displayLocation: initialData.location || initialData.form_data.displayLocation || "",
-          numberOfProducts: initialData.products_count?.toString() || initialData.form_data.numberOfProducts || "",
-          priority: initialData.priority?.toString() || initialData.form_data.priority || "",
-        }
+      // Load data from the new structure (basic_info, filters, amplifiers, personalization, visibility)
+      const basicInfo = initialData.basic_info || {}
+      const filters = initialData.filters || {}
+      const amplifiers = initialData.amplifiers || {}
+      const personalization = initialData.personalization || {}
+      const visibility = initialData.visibility || {}
 
-        // Fix data types that might be incorrect from database
-        if (!Array.isArray(formData.attributes)) {
-          formData.attributes = []
-        }
-        if (!formData.daysOfWeek || typeof formData.daysOfWeek !== 'object') {
-          formData.daysOfWeek = {
+      console.log("Loading from structured data:", { basicInfo, filters, amplifiers, personalization, visibility })
+
+      // Convert daysOfWeek from backend format to frontend format
+      const convertDaysOfWeek = (backendDays) => {
+        if (!backendDays || typeof backendDays !== 'object') {
+          return {
             monday: false,
             tuesday: false,
             wednesday: false,
@@ -48,113 +42,112 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
             sunday: false
           }
         }
-        if (!formData.deviceType || typeof formData.deviceType !== 'object') {
-          formData.deviceType = {
-            desktop: false,
-            mobile: false,
-            tablet: false
-          }
-        }
-        if (!formData.timeRange || typeof formData.timeRange !== 'object') {
-          formData.timeRange = { start: "", end: "" }
-        }
-        if (!formData.priceRange || typeof formData.priceRange !== 'object') {
-          formData.priceRange = { min: "", max: "" }
-        }
-        if (!formData.cartValueRange || typeof formData.cartValueRange !== 'object') {
-          formData.cartValueRange = { min: "", max: "" }
-        }
-        if (!formData.cartItemsCount || typeof formData.cartItemsCount !== 'object') {
-          formData.cartItemsCount = { min: "", max: "" }
-        }
-
-        return formData
-      } else {
-        // Fallback: create form data from campaign basic data
-        console.log("No form_data found, creating from basic campaign data")
         return {
-          // Basic Info
-          ruleName: initialData.name || "",
-          description: initialData.description || "",
-          recommendationType: initialData.type || "",
-          displayLocation: initialData.location || "",
-          numberOfProducts: initialData.products_count?.toString() || "",
-          priority: initialData.priority?.toString() || "",
-          showProductPrices: true,
-          showProductRatings: true,
-          showAddToCartButton: true,
-          showProductCategory: true,
-
-          // Filters - ensure correct data types
-          includeCategories: [],
-          includeTags: [],
-          priceRange: { min: "", max: "" },
-          stockStatus: "any",
-          productType: "any",
-          brands: [],
-          attributes: [], // Should be array, not object
-          excludeProducts: [],
-          excludeCategories: [],
-          excludeSaleProducts: false,
-          excludeFeaturedProducts: false,
-
-          // Amplifiers
-          salesPerformanceBoost: false,
-          salesBoostFactor: 1.5,
-          salesTimePeriod: "30-days",
-          inventoryLevelBoost: false,
-          inventoryBoostType: "low-stock",
-          inventoryThreshold: 10,
-          seasonalTrendingBoost: false,
-          trendingKeywords: [],
-          trendingDuration: "7-days",
-
-          // Personalization
-          purchaseHistoryBased: false,
-          purchaseHistoryPeriod: "90-days",
-          purchaseHistoryWeight: 0.7,
-          browsingBehavior: false,
-          recentlyViewedWeight: 0.5,
-          timeOnPageWeight: 0.3,
-          searchHistoryWeight: 0.4,
-          customerSegmentation: false,
-          customerType: "any",
-          spendingTier: "any",
-          geographicLocation: "any",
-          ageGroup: "any",
-          collaborativeFiltering: false,
-          similarUsersCount: 50,
-          similarityThreshold: 0.8,
-
-          // Visibility - ensure correct data types
-          startDate: "",
-          endDate: "",
-          daysOfWeek: {
-            monday: false,
-            tuesday: false,
-            wednesday: false,
-            thursday: false,
-            friday: false,
-            saturday: false,
-            sunday: false
-          },
-          timeRange: { start: "", end: "" },
-          userLoginStatus: "any",
-          userRoles: [],
-          minimumOrders: "",
-          minimumSpent: "",
-          deviceType: {
-            desktop: false,
-            mobile: false,
-            tablet: false
-          },
-          trafficSource: "any-source",
-          cartValueRange: { min: "", max: "" },
-          cartItemsCount: { min: "", max: "" },
-          requiredProductsInCart: [],
-          requiredCategoriesInCart: [],
+          monday: !!backendDays.monday,
+          tuesday: !!backendDays.tuesday,
+          wednesday: !!backendDays.wednesday,
+          thursday: !!backendDays.thursday,
+          friday: !!backendDays.friday,
+          saturday: !!backendDays.saturday,
+          sunday: !!backendDays.sunday
         }
       }
+
+      // Convert deviceType from backend format to frontend format
+      const convertDeviceType = (backendDevice) => {
+        if (!backendDevice || typeof backendDevice !== 'object') {
+          return {
+            desktop: false,
+            mobile: false,
+            tablet: false
+          }
+        }
+        return {
+          desktop: !!backendDevice.desktop,
+          mobile: !!backendDevice.mobile,
+          tablet: !!backendDevice.tablet
+        }
+      }
+
+      const formData = {
+        // Basic Info - from basic_info section or fallback to main campaign data
+        ruleName: basicInfo.ruleName || initialData.name || "",
+        description: basicInfo.description || initialData.description || "",
+        recommendationType: basicInfo.recommendationType || initialData.type || "",
+        displayLocation: basicInfo.displayLocation || initialData.location || "",
+        numberOfProducts: basicInfo.numberOfProducts || initialData.products_count?.toString() || "",
+        priority: basicInfo.priority || initialData.priority?.toString() || "",
+        showProductPrices: basicInfo.showProductPrices !== undefined ? !!basicInfo.showProductPrices : true,
+        showProductRatings: basicInfo.showProductRatings !== undefined ? !!basicInfo.showProductRatings : true,
+        showAddToCartButton: basicInfo.showAddToCartButton !== undefined ? !!basicInfo.showAddToCartButton : true,
+        showProductCategory: basicInfo.showProductCategory !== undefined ? !!basicInfo.showProductCategory : true,
+
+        // Filters - from filters section
+        includeCategories: filters.includeCategories || [],
+        includeTags: filters.includeTags || [],
+        priceRange: filters.priceRange || { min: "", max: "" },
+        stockStatus: filters.stockStatus || "any",
+        productType: filters.productType || "any",
+        brands: filters.brands || [],
+        attributes: filters.attributes || [],
+        excludeProducts: filters.excludeProducts || [],
+        excludeCategories: filters.excludeCategories || [],
+        excludeSaleProducts: !!filters.excludeSaleProducts,
+        excludeFeaturedProducts: !!filters.excludeFeaturedProducts,
+
+        // Amplifiers - from amplifiers section
+        salesPerformanceBoost: !!amplifiers.salesPerformanceBoost,
+        salesBoostFactor: amplifiers.salesBoostFactor || "medium",
+        salesTimePeriod: amplifiers.salesTimePeriod || "last-30-days",
+        inventoryLevelBoost: !!amplifiers.inventoryLevelBoost,
+        inventoryBoostType: amplifiers.inventoryBoostType || "high-stock",
+        inventoryThreshold: amplifiers.inventoryThreshold || "",
+        seasonalTrendingBoost: !!amplifiers.seasonalTrendingBoost,
+        trendingKeywords: amplifiers.trendingKeywords || [],
+        trendingDuration: amplifiers.trendingDuration || "",
+
+        // Personalization - from personalization section
+        purchaseHistoryBased: !!personalization.purchaseHistoryBased,
+        purchaseHistoryPeriod: personalization.purchaseHistoryPeriod || "last-90-days",
+        purchaseHistoryWeight: personalization.purchaseHistoryWeight || "high",
+        browsingBehavior: !!personalization.browsingBehavior,
+        recentlyViewedWeight: personalization.recentlyViewedWeight || "medium",
+        timeOnPageWeight: personalization.timeOnPageWeight || "medium",
+        searchHistoryWeight: personalization.searchHistoryWeight || "high",
+        customerSegmentation: !!personalization.customerSegmentation,
+        customerType: personalization.customerType || "all-customers",
+        spendingTier: personalization.spendingTier || "any-tier",
+        geographicLocation: personalization.geographicLocation || "any",
+        ageGroup: personalization.ageGroup || "any-age",
+        collaborativeFiltering: !!personalization.collaborativeFiltering,
+        similarUsersCount: personalization.similarUsersCount || "",
+        similarityThreshold: personalization.similarityThreshold || "high",
+        // Geographic location data - ONLY load IDs/codes, names will be resolved by middleware
+        selectedCountries: personalization.selectedCountries || [],
+        selectedStates: personalization.selectedStates || [],
+        // Initialize empty name arrays - middleware will populate these
+        selectedCountryNames: [],
+        selectedStateNames: [],
+
+        // Visibility - from visibility section
+        startDate: visibility.startDate || "",
+        endDate: visibility.endDate || "",
+        daysOfWeek: convertDaysOfWeek(visibility.daysOfWeek),
+        timeRange: visibility.timeRange || { start: "", end: "" },
+        userLoginStatus: visibility.userLoginStatus || "any",
+        userRoles: visibility.userRoles || [],
+        minimumOrders: visibility.minimumOrders || "",
+        minimumSpent: visibility.minimumSpent || "",
+        deviceType: convertDeviceType(visibility.deviceType),
+        trafficSource: visibility.trafficSource || "any-source",
+        cartValueRange: visibility.cartValueRange || { min: "", max: "" },
+        cartItemsCount: visibility.cartItemsCount || { min: "", max: "" },
+        requiredProductsInCart: visibility.requiredProductsInCart || [],
+        requiredCategoriesInCart: visibility.requiredCategoriesInCart || [],
+      }
+
+      console.log("Converted form data:", formData)
+      return formData
     }
     return {
       // Basic Info
@@ -171,14 +164,20 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
 
       // Filters
       includeCategories: [],
+      includeCategoryNames: [],
       includeTags: [],
+      includeTagNames: [],
       priceRange: { min: "", max: "" },
       stockStatus: "any",
       productType: "any",
       brands: [],
+      brandNames: [],
       attributes: [], // Array for join() method
+      attributeNames: [],
       excludeProducts: [],
+      excludeProductNames: [],
       excludeCategories: [],
+      excludeCategoryNames: [],
       excludeSaleProducts: false,
       excludeFeaturedProducts: false,
 
@@ -209,6 +208,11 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
       collaborativeFiltering: false,
       similarUsersCount: "",
       similarityThreshold: "medium",
+      // Geographic location data
+      selectedCountries: [],
+      selectedCountryNames: [],
+      selectedStates: [],
+      selectedStateNames: [],
 
       // Visibility
       startDate: "",
@@ -236,11 +240,69 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
       cartValueRange: { min: "", max: "" },
       cartItemsCount: { min: "", max: "" },
       requiredProductsInCart: [],
+      requiredProductsInCartNames: [],
       requiredCategoriesInCart: [],
+      requiredCategoriesInCartNames: [],
     }
   }
 
   const [formData, setFormData] = useState(getInitialFormData())
+  const [isLoadingNames, setIsLoadingNames] = useState(false)
+
+  // Process filter data with middleware when in edit mode
+  useEffect(() => {
+    const processFilterNames = async () => {
+      if (editMode && initialData && initialData.filters) {
+        setIsLoadingNames(true)
+        try {
+          console.log("Processing filter data with middleware:", initialData.filters)
+
+          // Process filter data to get names for IDs
+          const processedFilters = await filterDataMiddleware.processFilterData(initialData.filters)
+          console.log("Processed filter data:", processedFilters)
+
+          // Process visibility data if available
+          let processedVisibility = {}
+          if (initialData.visibility) {
+            processedVisibility = await filterDataMiddleware.processVisibilityData(initialData.visibility)
+            console.log("Processed visibility data:", processedVisibility)
+          }
+
+          // Process personalization data if available
+          let processedPersonalization = {}
+          if (initialData.personalization) {
+            processedPersonalization = await filterDataMiddleware.processPersonalizationData(initialData.personalization)
+            console.log("Processed personalization data:", processedPersonalization)
+          }
+
+          // Update form data with the processed names
+          setFormData(prevData => ({
+            ...prevData,
+            // Update filter-related names
+            includeCategoryNames: processedFilters.includeCategoryNames || [],
+            excludeCategoryNames: processedFilters.excludeCategoryNames || [],
+            includeTagNames: processedFilters.includeTagNames || [],
+            brandNames: processedFilters.brandNames || [],
+            attributeNames: processedFilters.attributeNames || [],
+            excludeProductNames: processedFilters.excludeProductNames || [],
+            // Update visibility-related names
+            requiredProductsInCartNames: processedVisibility.requiredProductsInCartNames || [],
+            requiredCategoriesInCartNames: processedVisibility.requiredCategoriesInCartNames || [],
+            // Update personalization-related names
+            selectedCountryNames: processedPersonalization.selectedCountryNames || prevData.selectedCountryNames || [],
+            selectedStateNames: processedPersonalization.selectedStateNames || prevData.selectedStateNames || []
+          }))
+
+        } catch (error) {
+          console.error("Error processing filter names:", error)
+        } finally {
+          setIsLoadingNames(false)
+        }
+      }
+    }
+
+    processFilterNames()
+  }, [editMode, initialData])
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({
@@ -330,6 +392,9 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
           collaborativeFiltering: formData.collaborativeFiltering || false,
           similarUsersCount: formData.similarUsersCount || 50,
           similarityThreshold: formData.similarityThreshold || 0.8,
+          // Geographic location data - ONLY save IDs/codes, names will be resolved by middleware
+          selectedCountries: formData.selectedCountries || [],
+          selectedStates: formData.selectedStates || [],
         },
         visibility: {
           startDate: formData.startDate || "",
@@ -346,10 +411,7 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
           cartItemsCount: formData.cartItemsCount || { min: "", max: "" },
           requiredProductsInCart: formData.requiredProductsInCart || [],
           requiredCategoriesInCart: formData.requiredCategoriesInCart || [],
-        },
-
-        // Flat form_data for easy editing
-        form_data: formData,
+        }
       }
 
       // Add performance data only for new campaigns

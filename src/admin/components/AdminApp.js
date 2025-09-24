@@ -6,6 +6,7 @@ import { ToastProvider } from "./context/ToastContext"
 import DashboardPage from "./pages/DashboardPage"
 import RecommendationsPage from "./pages/RecommendationsPage"
 import SettingsPage from "./pages/SettingsPage"
+import MiddlewareTestPage from "./MiddlewareTestPage"
 
 const AdminApp = () => {
   const [currentPage, setCurrentPage] = useState("dashboard")
@@ -26,6 +27,8 @@ const AdminApp = () => {
         return 'recommendations'
       } else if (page === 'upsellsmart-settings') {
         return 'settings'
+      } else if (page === 'upsellsmart-test') {
+        return 'test'
       } else {
         return 'dashboard'
       }
@@ -42,6 +45,8 @@ const AdminApp = () => {
         return <RecommendationsPage />
       case 'settings':
         return <SettingsPage />
+      case 'test':
+        return <MiddlewareTestPage />
       default:
         return <DashboardPage />
     }

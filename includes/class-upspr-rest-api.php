@@ -119,9 +119,6 @@ class UPSPR_REST_API {
                     'default' => 'active',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
-                'form_data' => array(
-                    'type' => 'object'
-                ),
                 'basic_info' => array(
                     'type' => 'object'
                 ),
@@ -199,9 +196,6 @@ class UPSPR_REST_API {
                     'type' => 'string',
                     'enum' => array( 'active', 'inactive' ),
                     'sanitize_callback' => 'sanitize_text_field'
-                ),
-                'form_data' => array(
-                    'type' => 'object'
                 ),
                 'basic_info' => array(
                     'type' => 'object'
@@ -297,7 +291,6 @@ class UPSPR_REST_API {
             'amplifiers' => $request->get_param( 'amplifiers' ),
             'personalization' => $request->get_param( 'personalization' ),
             'visibility' => $request->get_param( 'visibility' ),
-            'form_data' => $request->get_param( 'form_data' ),
             'performance' => $request->get_param( 'performance' )
         );
 
@@ -339,7 +332,7 @@ class UPSPR_REST_API {
         }
 
         $data = array();
-        $params = array( 'name', 'description', 'type', 'location', 'products_count', 'priority', 'status', 'basic_info', 'filters', 'amplifiers', 'personalization', 'visibility', 'form_data', 'performance' );
+        $params = array( 'name', 'description', 'type', 'location', 'products_count', 'priority', 'status', 'basic_info', 'filters', 'amplifiers', 'personalization', 'visibility', 'performance' );
 
         foreach ( $params as $param ) {
             $value = $request->get_param( $param );

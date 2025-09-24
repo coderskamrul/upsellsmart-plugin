@@ -35,6 +35,7 @@ class UPSPR_Admin {
         add_action( 'wp_ajax_upspr_get_brands', array( $this, 'ajax_get_brands' ) );
         add_action( 'wp_ajax_upspr_get_attributes', array( $this, 'ajax_get_attributes' ) );
         add_action( 'wp_ajax_upspr_get_products', array( $this, 'ajax_get_products' ) );
+        add_action( 'wp_ajax_upspr_get_products_by_ids', array( $this, 'ajax_get_products_by_ids' ) );
         add_action( 'wp_ajax_upspr_get_countries', array( $this, 'ajax_get_countries' ) );
         add_action( 'wp_ajax_upspr_get_states', array( $this, 'ajax_get_states' ) );
     }
@@ -147,6 +148,18 @@ class UPSPR_Admin {
             'upsellsmart-settings',
             array( $this, 'admin_page' )
         );
+
+        // Add test page for middleware (only in development)
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            add_submenu_page(
+                'upsellsmart',
+                __( 'Middleware Test', 'upsellsmart-product-recommendations' ),
+                __( 'Middleware Test', 'upsellsmart-product-recommendations' ),
+                'manage_woocommerce',
+                'upsellsmart-test',
+                array( $this, 'admin_page' )
+            );
+        }
     }
 
     /**
@@ -377,6 +390,61 @@ class UPSPR_Admin {
         foreach ( $products as $product_post ) {
             $product = wc_get_product( $product_post->ID );
             
+            if ( ! $product ) {
+                continue;
+            }
+
+            // Get product price
+            $price = '';
+            if ( $product->get_price() ) {
+                $price = wc_price( $product->get_price() );
+            }
+
+            $formatted_products[] = array(
+                'id' => $product->get_id(),
+                'name' => $product->get_name(),
+                'sku' => $product->get_sku() ?: '',
+                'price' => $price,
+                'type' => $product->get_type(),
+                'status' => $product->get_status()
+            );
+        }
+
+        wp_send_json_success( $formatted_products );
+    }
+
+    /**
+     * AJAX handler to get WooCommerce products by IDs
+     */
+    public function ajax_get_products_by_ids() {
+        // Check nonce for security
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
+            wp_die( 'Security check failed' );
+        }
+
+        // Check user permissions
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_die( 'Insufficient permissions' );
+        }
+
+        $product_ids = sanitize_text_field( $_POST['product_ids'] ?? '' );
+
+        if ( empty( $product_ids ) ) {
+            wp_send_json_success( array() );
+        }
+
+        // Convert comma-separated string to array
+        $ids_array = array_map( 'intval', explode( ',', $product_ids ) );
+        $ids_array = array_filter( $ids_array ); // Remove empty values
+
+        if ( empty( $ids_array ) ) {
+            wp_send_json_success( array() );
+        }
+
+        $formatted_products = array();
+        foreach ( $ids_array as $product_id ) {
+            $product = wc_get_product( $product_id );
+
             if ( ! $product ) {
                 continue;
             }

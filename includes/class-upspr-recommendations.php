@@ -55,7 +55,7 @@ class UPSPR_Recommendations {
         // Get active campaigns for product page
         $campaigns = $this->get_campaigns_for_location( 'product-page' );
         //echo '<pre>'; print_r('ndvhdsnv'); echo '</pre>';
-        //echo 'a<pre>'; print_r($campaigns); echo '</pre>';
+        echo 'a<pre>'; print_r($campaigns); echo '</pre>';
         if ( empty( $campaigns ) ) {
             return;
         }
