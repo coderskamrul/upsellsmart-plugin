@@ -26,8 +26,7 @@ const MiddlewareTestPage = () => {
   const samplePersonalizationData = {
     selectedCountries: ['BD', 'AR', 'US'],
     selectedStates: ['BD:BD-05', 'BD:BD-01', 'US:NY'],
-    customerSegmentation: true,
-    geographicLocation: 'any'
+    customerSegmentation: true
   }
 
   const testMiddleware = async () => {
