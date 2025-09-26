@@ -43,6 +43,9 @@ class UPSPR_Recommendations {
      * Initialize
      */
     private function init() {
+        // Load all campaign engine types
+        require_once plugin_dir_path( __FILE__ ) . 'class-upspr-engine-type/index.php';
+
         // Add hooks for recommendation display
         add_action( 'woocommerce_single_product_summary', array( $this, 'display_product_recommendations' ), 25 );
         add_action( 'woocommerce_after_cart_table', array( $this, 'display_cart_recommendations' ) );
@@ -54,17 +57,14 @@ class UPSPR_Recommendations {
     public function display_product_recommendations() {
         // Get active campaigns for product page
         $campaigns = $this->get_campaigns_for_location( 'product-page' );
-        //echo '<pre>'; print_r('ndvhdsnv'); echo '</pre>';
-        echo 'a<pre>'; print_r($campaigns); echo '</pre>';
+
         if ( empty( $campaigns ) ) {
             return;
         }
-        // TODO: Process and display campaigns
-        // For now, we'll output a placeholder for each campaign
-        foreach ( $campaigns as $campaign ) {
-            echo 'a<pre>'; print_r($campaign['name']); echo '</pre>';
-            // TODO: Implement actual campaign rendering logic
-        }
+
+        // Process and display campaigns using the factory
+
+        echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
     }
 
     /**
@@ -73,17 +73,13 @@ class UPSPR_Recommendations {
     public function display_cart_recommendations() {
         // Get active campaigns for cart page
         $campaigns = $this->get_campaigns_for_location( 'cart-page' );
-        
+
         if ( empty( $campaigns ) ) {
             return;
         }
 
-        // TODO: Process and display campaigns
-        // For now, we'll output a placeholder for each campaign
-        foreach ( $campaigns as $campaign ) {
-            echo '<!-- UpsellSmart Campaign: ' . esc_html( $campaign['name'] ) . ' (ID: ' . intval( $campaign['id'] ) . ') -->';
-            // TODO: Implement actual campaign rendering logic
-        }
+        // Process and display campaigns using the factory
+        echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
     }
 
     /**
@@ -143,5 +139,47 @@ class UPSPR_Recommendations {
      */
     public function get_campaigns_by_type( $type ) {
         return $this->get_active_campaigns( '', $type );
+    }
+
+    /**
+     * Get campaign statistics
+     *
+     * @return array Campaign statistics
+     */
+    public function get_campaign_statistics() {
+        $all_campaigns = $this->get_active_campaigns();
+        return UPSPR_Campaign_Factory::get_campaign_statistics( $all_campaigns );
+    }
+
+    /**
+     * Process specific campaign
+     *
+     * @param array $campaign_data Campaign data
+     * @return array|false Processed campaign data or false on failure
+     */
+    public function process_campaign( $campaign_data ) {
+        $campaign_instance = UPSPR_Campaign_Factory::create_campaign( $campaign_data );
+
+        if ( $campaign_instance ) {
+            return $campaign_instance->process();
+        }
+
+        return false;
+    }
+
+    /**
+     * Render specific campaign
+     *
+     * @param array $campaign_data Campaign data
+     * @return string HTML output
+     */
+    public function render_campaign( $campaign_data ) {
+        $campaign_instance = UPSPR_Campaign_Factory::create_campaign( $campaign_data );
+
+        if ( $campaign_instance ) {
+            return $campaign_instance->render();
+        }
+
+        return '';
     }
 }
