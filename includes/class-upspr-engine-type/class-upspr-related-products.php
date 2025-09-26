@@ -39,7 +39,14 @@ class UPSPR_Related_Products {
         }
 
         $recommendations = $this->get_related_recommendations( $current_product_id );
-        return $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'related-products' );
+        }
+
+        return $formatted_recommendations;
     }
 
     /**

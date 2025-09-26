@@ -219,6 +219,8 @@ class UPSPR_Database {
             $result['form_data'] = json_decode( $result['form_data'], true );
             $result['performance'] = json_decode( $result['performance_data'], true );
             unset( $result['performance_data'] );
+            unset( $result['form_data'] );
+            unset( $result['hook_location'] );
             
             // Remove duplicated fields that are now in organized sections
             $fields_to_remove = array(
@@ -227,7 +229,6 @@ class UPSPR_Database {
                 'personalization_settings', 'visibility_settings',
                 'views', 'clicks', 'conversions', 'revenue'
             );
-            
             foreach ( $fields_to_remove as $field ) {
                 if ( isset( $result[ $field ] ) ) {
                     unset( $result[ $field ] );

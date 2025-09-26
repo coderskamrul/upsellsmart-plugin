@@ -20,7 +20,7 @@ class UPSPR_Upsell {
      * @param array $campaign_data The campaign data
      */
     public function __construct( $campaign_data = array() ) {
-        echo 'k<pre>'; print_r('upsell'); echo '</pre>';
+       // echo 'k<pre>'; print_r('upsell'); echo '</pre>';
         $this->campaign_data = $campaign_data;
     }
 
@@ -42,8 +42,14 @@ class UPSPR_Upsell {
 
         // Get upsell recommendations based on campaign rules
         $recommendations = $this->get_upsell_recommendations( $current_product_id );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
 
-        return $this->format_recommendations( $recommendations );
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'upsell' );
+        }
+
+        return $formatted_recommendations;
     }
 
     /**

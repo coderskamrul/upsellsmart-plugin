@@ -65,13 +65,20 @@ class UPSPR_Recently_Viewed {
         }
 
         $recently_viewed = [];
-        
+
         if ( empty( $recently_viewed ) ) {
             return false;
         }
 
         $recommendations = $this->get_recently_viewed_recommendations( $recently_viewed );
-        return $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
+        }
+
+        return $formatted_recommendations;
     }
 
     /**

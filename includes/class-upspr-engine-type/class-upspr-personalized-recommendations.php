@@ -31,7 +31,14 @@ class UPSPR_Personalized_Recommendations {
 
         $user_id = get_current_user_id();
         $recommendations = $this->get_personalized_recommendations( $user_id );
-        return $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
+        }
+
+        return $formatted_recommendations;
     }
 
     /**

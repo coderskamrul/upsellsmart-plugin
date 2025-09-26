@@ -47,8 +47,9 @@ class UPSPR_Recommendations {
         require_once plugin_dir_path( __FILE__ ) . 'class-upspr-engine-type/index.php';
 
         // Add hooks for recommendation display
-        add_action( 'woocommerce_single_product_summary', array( $this, 'display_product_recommendations' ), 25 );
-        add_action( 'woocommerce_after_cart_table', array( $this, 'display_cart_recommendations' ) );
+       // add_action( 'woocommerce_single_product_summary', array( $this, 'display_product_recommendations' ), 25 );
+        add_action( 'wp', array( $this, 'display_product_recommendations' ), 20 );
+        //$this->display_product_recommendations();
     }
 
     /**
@@ -56,29 +57,12 @@ class UPSPR_Recommendations {
      */
     public function display_product_recommendations() {
         // Get active campaigns for product page
-        $campaigns = $this->get_campaigns_for_location( 'product-page' );
+        $campaigns = $this->get_campaigns_for_location( '' );
 
         if ( empty( $campaigns ) ) {
             return;
         }
 
-        // Process and display campaigns using the factory
-
-        echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
-    }
-
-    /**
-     * Display cart page recommendations
-     */
-    public function display_cart_recommendations() {
-        // Get active campaigns for cart page
-        $campaigns = $this->get_campaigns_for_location( 'cart-page' );
-
-        if ( empty( $campaigns ) ) {
-            return;
-        }
-
-        // Process and display campaigns using the factory
         echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
     }
 

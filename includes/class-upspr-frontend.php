@@ -55,6 +55,14 @@ class UPSPR_Frontend {
             UPSPR_VERSION
         );
 
+        // Enqueue campaign widgets CSS
+        wp_enqueue_style(
+            'upspr-campaign-widgets',
+            UPSPR_PLUGIN_URL . 'assets/css/campaign-widgets.css',
+            array(),
+            UPSPR_VERSION
+        );
+
         wp_enqueue_script(
             'upspr-frontend',
             UPSPR_PLUGIN_URL . 'js/frontend.js',

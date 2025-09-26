@@ -21,7 +21,6 @@ class UPSPR_Cross_Sell {
      */
     public function __construct( $campaign_data = array() ) {
         $this->campaign_data = $campaign_data;
-        echo 'kxx<pre>'; print_r('cross-sell'); echo '</pre>';
     }
 
     /**
@@ -33,17 +32,24 @@ class UPSPR_Cross_Sell {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
-
+        //add woocommerce_after_add_to_cart_quantity this hook to get product
+        //add_action( 'woocommerce_after_add_to_cart_quantity', array( $this, 'display_product_recommendations_pro' ), 25 );
         // Get current product ID
-        $current_product_id = $this->get_current_product_id();
-        if ( ! $current_product_id ) {
-            return false;
+        // $current_product_id = $this->get_current_product_id();
+        // if ( ! $current_product_id ) {
+        //     return false;
+        // }
+
+        // TODO: Get cross-sell recommendations based on campaign rules get recommendations product list
+        $recommendations = $this->get_cross_sell_recommendations( );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
         }
 
-        // Get cross-sell recommendations based on campaign rules
-        $recommendations = $this->get_cross_sell_recommendations( $current_product_id );
-
-        return $this->format_recommendations( $recommendations );
+        return $formatted_recommendations;
     }
 
     /**

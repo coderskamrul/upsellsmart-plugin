@@ -10,7 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Load the campaign factory first
+// Load the location display system first
+require_once __DIR__ . '/class-upspr-location-display.php';
+
+// Load the campaign factory
 require_once __DIR__ . '/class-upspr-campaign-factory.php';
 
 // Load all campaign type classes
@@ -24,11 +27,53 @@ require_once __DIR__ . '/class-upspr-recently-viewed.php';
 
 /**
  * Helper function to get campaign factory instance
- * 
+ *
  * @return UPSPR_Campaign_Factory
  */
 function upspr_get_campaign_factory() {
     return new UPSPR_Campaign_Factory();
+}
+
+/**
+ * Helper function to display campaign at specific location
+ *
+ * @param array $campaign_data Campaign data with basic_info containing displayLocation and hookLocation
+ * @param array $recommendations Array of formatted product recommendations
+ * @param string $campaign_type Campaign type (cross-sell, upsell, etc.)
+ * @return bool True if displayed successfully, false otherwise
+ */
+function upspr_display_campaign_at_location( $campaign_data, $recommendations, $campaign_type = '' ) {
+    return UPSPR_Location_Display::display_campaign( $campaign_data, $recommendations, $campaign_type );
+}
+
+/**
+ * Helper function to get available hooks for a display location
+ *
+ * @param string $display_location Display location (home-page, product-page, etc.)
+ * @return array Available hooks for the location
+ */
+function upspr_get_location_hooks( $display_location ) {
+    return UPSPR_Location_Display::get_hooks_for_location( $display_location );
+}
+
+/**
+ * Helper function to get default hook for a display location
+ *
+ * @param string $display_location Display location
+ * @return string Default hook location
+ */
+function upspr_get_default_hook( $display_location ) {
+    return UPSPR_Location_Display::get_default_hook( $display_location );
+}
+
+/**
+ * Helper function to validate campaign data for location display
+ *
+ * @param array $campaign_data Campaign data
+ * @return bool True if valid, false otherwise
+ */
+function upspr_validate_campaign_location( $campaign_data ) {
+    return UPSPR_Location_Display::validate_campaign_data( $campaign_data );
 }
 
 /**

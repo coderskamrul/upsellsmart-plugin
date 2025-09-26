@@ -81,6 +81,9 @@ class UPSPR_Product_Recommendations {
         require_once UPSPR_PLUGIN_PATH . 'includes/class-upspr-recommendations.php';
         require_once UPSPR_PLUGIN_PATH . 'includes/class-upspr-frontend.php';
         require_once UPSPR_PLUGIN_PATH . 'includes/class-upspr-settings.php';
+
+        // Load campaign engine types and location display system
+        require_once UPSPR_PLUGIN_PATH . 'includes/class-upspr-engine-type/index.php';
     }
 
     /**

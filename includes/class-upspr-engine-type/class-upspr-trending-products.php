@@ -31,7 +31,14 @@ class UPSPR_Trending_Products {
         }
 
         $recommendations = $this->get_trending_products();
-        return $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+
+        // Display the campaign using the location display system
+        if ( ! empty( $formatted_recommendations ) ) {
+            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'trending-products' );
+        }
+
+        return $formatted_recommendations;
     }
 
     /**
