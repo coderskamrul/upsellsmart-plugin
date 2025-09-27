@@ -357,4 +357,18 @@ class UPSPR_Location_Display {
 
         return self::is_valid_hook_for_location( $basic_info['displayLocation'], $basic_info['hookLocation'] );
     }
+
+    /**
+     * Get campaign widget HTML without echoing it
+     *
+     * @param array $campaign_data Campaign data
+     * @param array $recommendations Recommendations to display
+     * @param string $campaign_type Campaign type
+     * @return string HTML output
+     */
+    public static function get_campaign_html( $campaign_data, $recommendations, $campaign_type = '' ) {
+        ob_start();
+        self::render_campaign_widget( $campaign_data, $recommendations, $campaign_type );
+        return ob_get_clean();
+    }
 }

@@ -74,4 +74,28 @@ class UPSPR_Personalized_Recommendations {
         return $formatted;
     }
 
+    /**
+     * Render the campaign and return HTML
+     *
+     * @return string HTML output or empty string if no recommendations
+     */
+    public function render() {
+        if ( empty( $this->campaign_data ) ) {
+            return '';
+        }
+
+        $user_id = get_current_user_id();
+        $recommendations = $this->get_personalized_recommendations( $user_id );
+        if ( empty( $recommendations ) ) {
+            return '';
+        }
+
+        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        if ( ! empty( $formatted_recommendations ) ) {
+            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
+        }
+
+        return '';
+    }
+
 }

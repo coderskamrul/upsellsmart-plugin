@@ -94,11 +94,42 @@ class UPSPR_Recently_Viewed {
      * Get current product ID
      */
     private function get_current_product_id() {
-        global $product;
+        global $product, $post;
         
-        if ( is_product() && $product ) {
+        // Method 1: Try global $product if it's a valid WC_Product object
+        if ( is_object( $product ) && is_a( $product, 'WC_Product' ) ) {
             return $product->get_id();
         }
+        
+        // Method 2: If we're on a product page, get ID from global $post
+        if ( is_product() && is_object( $post ) && $post->post_type === 'product' ) {
+            return $post->ID;
+        }
+        
+        // Method 3: Try to get product ID from URL/query vars
+        if ( is_product() ) {
+            $product_id = get_queried_object_id();
+            if ( $product_id && get_post_type( $product_id ) === 'product' ) {
+                return $product_id;
+            }
+        }
+        
+        // Method 4: For AJAX requests or other contexts, try to get from $_GET
+        if ( isset( $_GET['product_id'] ) && is_numeric( $_GET['product_id'] ) ) {
+            $product_id = absint( $_GET['product_id'] );
+            if ( get_post_type( $product_id ) === 'product' ) {
+                return $product_id;
+            }
+        }
+        
+        // Method 5: Try to initialize product from post if not already done
+        if ( is_object( $post ) && $post->post_type === 'product' && ! is_object( $product ) ) {
+            $product = wc_get_product( $post->ID );
+            if ( is_object( $product ) && is_a( $product, 'WC_Product' ) ) {
+                return $product->get_id();
+            }
+        }
+
         return false;
     }
 
@@ -125,6 +156,31 @@ class UPSPR_Recently_Viewed {
         }
 
         return $formatted;
+    }
+
+    /**
+     * Render the campaign and return HTML
+     *
+     * @return string HTML output or empty string if no recommendations
+     */
+    public function render() {
+        if ( empty( $this->campaign_data ) ) {
+            return '';
+        }
+
+        $recently_viewed = isset( $_COOKIE['upspr_recently_viewed'] ) ? 
+            json_decode( stripslashes( $_COOKIE['upspr_recently_viewed'] ), true ) : array();
+
+        if ( empty( $recently_viewed ) ) {
+            return '';
+        }
+
+        $formatted_recommendations = $this->format_recommendations( $recently_viewed );
+        if ( ! empty( $formatted_recommendations ) ) {
+            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
+        }
+
+        return '';
     }
 
 }

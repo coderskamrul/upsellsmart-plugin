@@ -76,4 +76,27 @@ class UPSPR_Trending_Products {
         return $formatted;
     }
 
+    /**
+     * Render the campaign and return HTML
+     *
+     * @return string HTML output or empty string if no recommendations
+     */
+    public function render() {
+        if ( empty( $this->campaign_data ) ) {
+            return '';
+        }
+
+        $trending_products = $this->get_trending_products();
+        if ( empty( $trending_products ) ) {
+            return '';
+        }
+
+        $formatted_recommendations = $this->format_recommendations( $trending_products );
+        if ( ! empty( $formatted_recommendations ) ) {
+            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'trending-products' );
+        }
+
+        return '';
+    }
+
 }

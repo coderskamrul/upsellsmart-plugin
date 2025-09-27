@@ -159,7 +159,7 @@ class UPSPR_Campaign_Factory {
                     $results[] = array(
                         'campaign' => $campaign,
                         'recommendations' => $processed_data,
-                        'html' => $campaign_instance->render(),
+                        //'html' => $campaign_instance->render(),
                     );
                 }
             }
