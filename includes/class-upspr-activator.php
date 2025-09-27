@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Activator
+ * Plugin Activator UPSPR
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
