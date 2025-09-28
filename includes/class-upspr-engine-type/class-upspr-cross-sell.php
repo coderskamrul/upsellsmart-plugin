@@ -64,9 +64,9 @@ class UPSPR_Cross_Sell {
         if ( ! empty( $formatted_recommendations ) ) {
             UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
 
-            // Track impression
+            // Track impression with campaign-specific validation
             $product_ids = array_column( $formatted_recommendations, 'id' );
-            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids );
+            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
         }
 
         return $formatted_recommendations;
@@ -81,7 +81,6 @@ class UPSPR_Cross_Sell {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
-        
         // Check visibility rules first
         $visibility_config = isset( $this->campaign_data['visibility'] ) ? $this->campaign_data['visibility'] : array();
         if ( ! UPSPR_Visibility_Checker::should_display_campaign( $visibility_config ) ) {
@@ -98,10 +97,10 @@ class UPSPR_Cross_Sell {
 
         // Get HTML from location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            // Track impression
+            // Track impression with campaign-specific validation
             $product_ids = array_column( $formatted_recommendations, 'id' );
-            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids );
-            
+            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
+
             return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
         }
 

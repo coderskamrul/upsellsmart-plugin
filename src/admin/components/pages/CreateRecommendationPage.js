@@ -411,10 +411,10 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
       // Add performance data only for new campaigns
       if (!editMode) {
         campaignData.performance = {
-          impressions: Math.floor(Math.random() * 1000) + 100, // Random demo data
-          clicks: Math.floor(Math.random() * 100) + 10,
-          conversions: Math.floor(Math.random() * 20) + 1,
-          revenue: parseFloat((Math.random() * 500 + 50).toFixed(2)),
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          revenue: 0,
         }
       }
 
