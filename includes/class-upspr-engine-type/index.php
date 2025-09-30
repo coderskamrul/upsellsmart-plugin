@@ -16,6 +16,9 @@ require_once __DIR__ . '/class-upspr-location-display.php';
 // Load the campaign factory
 require_once __DIR__ . '/class-upspr-campaign-factory.php';
 
+// Load helper classes first
+require_once __DIR__ . '/Helper/class-upspr-performance-tracker.php';
+
 // Load all campaign type classes
 require_once __DIR__ . '/class-upspr-cross-sell.php';
 require_once __DIR__ . '/class-upspr-upsell.php';
@@ -24,6 +27,9 @@ require_once __DIR__ . '/class-upspr-frequently-bought-together.php';
 require_once __DIR__ . '/class-upspr-personalized-recommendations.php';
 require_once __DIR__ . '/class-upspr-trending-products.php';
 require_once __DIR__ . '/class-upspr-recently-viewed.php';
+
+// Load integration classes
+require_once __DIR__ . '/class-upspr-cross-sell-integration.php';
 
 /**
  * Helper function to get campaign factory instance

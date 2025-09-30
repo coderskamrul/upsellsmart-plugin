@@ -42,6 +42,20 @@ class UpsellSmartFrontend {
                 this.addToCartFromRecommendation(e.target);
             }
         });
+
+        // Handle campaign widget product link clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.upspr-product-link') || e.target.closest('.upspr-product-link')) {
+                this.trackCampaignClick(e.target);
+            }
+        });
+
+        // Handle campaign widget add to cart clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.upspr-add-to-cart-btn')) {
+                this.trackCampaignClick(e.target);
+            }
+        });
     }
 
     async loadRecommendations() {
@@ -200,6 +214,79 @@ class UpsellSmartFrontend {
         }).catch(error => {
             console.error('Failed to track add to cart:', error);
         });
+    }
+
+    trackCampaignClick(element) {
+        // Find the campaign widget and product item
+        const campaignWidget = element.closest('.upspr-campaign-widget');
+        const productItem = element.closest('.upspr-product-item');
+
+        if (!campaignWidget || !productItem) {
+            return;
+        }
+
+        const campaignId = campaignWidget.dataset.campaignId;
+        const productId = productItem.dataset.productId;
+
+        if (!campaignId || !productId) {
+            return;
+        }
+
+        // Store campaign interaction for conversion tracking
+        this.storeCampaignInteraction(campaignId, productId);
+        this.storeCampaignInteractionServer(campaignId, productId, 'click');
+
+        // Send click tracking via AJAX to WordPress
+        if (window.upspr_frontend && window.upspr_frontend.ajax_url) {
+            const formData = new FormData();
+            formData.append('action', 'upspr_track_click');
+            formData.append('nonce', window.upspr_frontend.nonce);
+            formData.append('campaign_id', campaignId);
+            formData.append('product_id', productId);
+            formData.append('campaign_type', 'cross-sell'); // Only track cross-sell for now
+
+            fetch(window.upspr_frontend.ajax_url, {
+                method: 'POST',
+                body: formData
+            }).catch(error => {
+                console.error('Failed to track campaign click:', error);
+            });
+        }
+    }
+
+    storeCampaignInteraction(campaignId, productId) {
+        // Store the campaign interaction in session storage for conversion tracking
+        const key = `upspr_campaign_${productId}`;
+        const interaction = {
+            campaignId: campaignId,
+            timestamp: Date.now(),
+            type: 'click'
+        };
+
+        try {
+            sessionStorage.setItem(key, JSON.stringify(interaction));
+        } catch (error) {
+            console.error('Failed to store campaign interaction:', error);
+        }
+    }
+
+    storeCampaignInteractionServer(campaignId, productId, type) {
+        // Also store on server for more reliable conversion tracking
+        if (window.upspr_frontend && window.upspr_frontend.ajax_url) {
+            const formData = new FormData();
+            formData.append('action', 'upspr_store_campaign_interaction');
+            formData.append('nonce', window.upspr_frontend.nonce);
+            formData.append('campaign_id', campaignId);
+            formData.append('product_id', productId);
+            formData.append('type', type);
+
+            fetch(window.upspr_frontend.ajax_url, {
+                method: 'POST',
+                body: formData
+            }).catch(error => {
+                console.error('Failed to store campaign interaction on server:', error);
+            });
+        }
     }
 }
 

@@ -13,12 +13,20 @@ class UPSPR_Cross_Sell_Integration {
      * Initialize integration
      */
     public static function init() {
+
         // Hook into WordPress init to process active cross-sell campaigns
         add_action( 'wp', array( __CLASS__, 'process_active_campaigns' ) );
-        
         // Hook into WooCommerce order completion to track conversions
         add_action( 'woocommerce_order_status_completed', array( __CLASS__, 'track_conversions' ) );
         add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'track_conversions' ) );
+
+        // Add AJAX handler for storing campaign interactions
+        add_action( 'wp_ajax_upspr_store_campaign_interaction', array( __CLASS__, 'ajax_store_campaign_interaction' ) );
+        add_action( 'wp_ajax_nopriv_upspr_store_campaign_interaction', array( __CLASS__, 'ajax_store_campaign_interaction' ) );
+
+        // Add test AJAX handler
+        add_action( 'wp_ajax_upspr_test_conversion_tracking', array( __CLASS__, 'test_conversion_tracking' ) );
+
     }
 
     /**
@@ -50,13 +58,13 @@ class UPSPR_Cross_Sell_Integration {
      */
     private static function get_active_cross_sell_campaigns() {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . 'upspr_recommendation_campaigns';
-        
+
         $campaigns = $wpdb->get_results( $wpdb->prepare(
-            "SELECT * FROM {$table_name} 
-             WHERE type = %s 
-             AND status = %s 
+            "SELECT * FROM {$table_name}
+             WHERE type = %s
+             AND status = %s
              ORDER BY priority DESC, created_at ASC",
             'cross-sell',
             'active'
@@ -96,7 +104,7 @@ class UPSPR_Cross_Sell_Integration {
      */
     public static function track_conversions( $order_id ) {
         $order = wc_get_order( $order_id );
-        
+
         if ( ! $order ) {
             return;
         }
@@ -127,25 +135,68 @@ class UPSPR_Cross_Sell_Integration {
      * @param int $customer_id Customer ID
      */
     private static function check_and_track_product_conversion( $product_id, $quantity, $line_total, $customer_id ) {
-        // This is a simplified implementation
-        // In a real scenario, you'd track which campaigns showed which products to which users
-        // and match conversions accordingly
-        
-        // For now, we'll attribute conversions to any active cross-sell campaign
-        // that could have shown this product
-        $campaigns = self::get_active_cross_sell_campaigns();
-        
-        foreach ( $campaigns as $campaign ) {
-            // Simple check: if the product could have been recommended by this campaign
-            if ( self::could_campaign_recommend_product( $campaign, $product_id ) ) {
-                UPSPR_Performance_Tracker::track_conversion( 
-                    $campaign['id'], 
-                    $product_id, 
-                    $line_total 
-                );
-                break; // Only attribute to one campaign to avoid double counting
+        // Check if we have session data indicating which campaign this product was clicked from
+        $campaign_id = self::get_campaign_from_session( $product_id );
+
+        if ( $campaign_id ) {
+            // We have specific campaign attribution data
+            UPSPR_Performance_Tracker::track_conversion(
+                $campaign_id,
+                $product_id,
+                $line_total,
+                'cross-sell'
+            );
+
+            // Clear the session data to prevent double counting
+            self::clear_campaign_session_data( $product_id );
+        } else {
+            // Fallback to the original logic for products without specific attribution
+            $campaigns = self::get_active_cross_sell_campaigns();
+
+            foreach ( $campaigns as $campaign ) {
+                // Simple check: if the product could have been recommended by this campaign
+                if ( self::could_campaign_recommend_product( $campaign, $product_id ) ) {
+                    UPSPR_Performance_Tracker::track_conversion(
+                        $campaign['id'],
+                        $product_id,
+                        $line_total,
+                        'cross-sell'
+                    );
+                    break; // Only attribute to one campaign to avoid double counting
+                }
             }
         }
+    }
+
+    /**
+     * Get campaign ID from session data for a specific product
+     *
+     * @param int $product_id Product ID
+     * @return int|false Campaign ID or false if not found
+     */
+    private static function get_campaign_from_session( $product_id ) {
+        // Check if we have session data from JavaScript
+        // This would typically be stored via AJAX when a user clicks on a recommendation
+
+        // For now, we'll use a transient as a fallback since we can't directly access sessionStorage from PHP
+        $session_key = 'upspr_campaign_' . $product_id . '_' . session_id();
+        $campaign_data = get_transient( $session_key );
+
+        if ( $campaign_data && isset( $campaign_data['campaign_id'] ) ) {
+            return intval( $campaign_data['campaign_id'] );
+        }
+
+        return false;
+    }
+
+    /**
+     * Clear campaign session data for a product
+     *
+     * @param int $product_id Product ID
+     */
+    private static function clear_campaign_session_data( $product_id ) {
+        $session_key = 'upspr_campaign_' . $product_id . '_' . session_id();
+        delete_transient( $session_key );
     }
 
     /**
@@ -268,7 +319,54 @@ class UPSPR_Cross_Sell_Integration {
             'message' => ! empty( $recommendations ) ? 'Cross-sell functionality working correctly' : 'No recommendations generated'
         );
     }
+
+    /**
+     * AJAX handler for storing campaign interactions
+     */
+    public static function ajax_store_campaign_interaction() {
+        check_ajax_referer( 'upspr_tracking_nonce', 'nonce' );
+
+        $campaign_id = intval( $_POST['campaign_id'] );
+        $product_id = intval( $_POST['product_id'] );
+        $interaction_type = sanitize_text_field( $_POST['type'] );
+
+        if ( ! $campaign_id || ! $product_id ) {
+            wp_send_json_error( 'Invalid campaign or product ID' );
+        }
+
+        // Store interaction data in transient for conversion tracking
+        $session_key = 'upspr_campaign_' . $product_id . '_' . session_id();
+        $interaction_data = array(
+            'campaign_id' => $campaign_id,
+            'product_id' => $product_id,
+            'type' => $interaction_type,
+            'timestamp' => time()
+        );
+
+        // Store for 24 hours
+        set_transient( $session_key, $interaction_data, 24 * HOUR_IN_SECONDS );
+
+        wp_send_json_success( array( 'stored' => true ) );
+    }
+
+    /**
+     * Test function to manually trigger conversion tracking
+     * This can be called via admin-ajax.php for testing
+     */
+    public static function test_conversion_tracking() {
+        echo '<pre>'; print_r('Testing conversion tracking...'); echo '</pre>';
+
+        // Simulate an order with some products
+        $test_order_id = 123; // Use a fake order ID for testing
+        $test_product_id = 456; // Use a fake product ID
+        $test_line_total = 29.99;
+        $test_customer_id = 1;
+
+        echo '<pre>'; print_r('Calling check_and_track_product_conversion...'); echo '</pre>';
+        self::check_and_track_product_conversion( $test_product_id, 1, $test_line_total, $test_customer_id );
+
+        echo '<pre>'; print_r('Test completed'); echo '</pre>';
+    }
 }
 
-// Initialize the integration
-UPSPR_Cross_Sell_Integration::init();
+// Integration will be initialized from the main plugin file

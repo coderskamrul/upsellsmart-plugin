@@ -62,7 +62,7 @@ class UPSPR_Recommendations {
         if ( empty( $campaigns ) ) {
             return;
         }
-
+       //echo '<pre>'; print_r($campaigns[0]['performance']); echo '</pre>';
         echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
     }
 

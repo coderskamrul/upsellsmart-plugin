@@ -61,7 +61,6 @@ class UPSPR_Performance_Tracker {
                 $performance['product_impressions'][ $product_id ]++;
             }
         }
-        echo 'pr<pre>'; print_r($performance); echo '</pre>';
         return self::update_campaign_performance( $campaign_id, $performance );
     }
 
@@ -92,30 +91,13 @@ class UPSPR_Performance_Tracker {
         $campaign_type = $campaign_data['type'];
         $display_location = $basic_info['displayLocation'];
 
-        // Campaign-specific validation using switch case
-        switch ( $campaign_type ) {
-            case 'cross-sell':
-                return self::validate_cross_sell_impression( $display_location, $product_ids );
-
-            case 'upsell':
-                return self::validate_upsell_impression( $display_location, $product_ids );
-
-            case 'related-products':
-                return self::validate_related_products_impression( $display_location, $product_ids );
-
-            case 'frequently-bought-together':
-                return self::validate_fbt_impression( $display_location, $product_ids );
-
-            case 'trending-products':
-                return self::validate_trending_impression( $display_location, $product_ids );
-
-            case 'recently-viewed':
-                return self::validate_recently_viewed_impression( $display_location, $product_ids );
-
-            default:
-                // Default validation for unknown campaign types
-                return self::validate_default_impression( $display_location, $product_ids );
+        // Only validate cross-sell campaigns for now
+        if ( $campaign_type === 'cross-sell' ) {
+            return self::validate_cross_sell_impression( $display_location, $product_ids );
         }
+
+        // Skip validation for other campaign types
+        return false;
     }
 
     /**
@@ -157,184 +139,40 @@ class UPSPR_Performance_Tracker {
         return true;
     }
 
-    /**
-     * Validate upsell campaign impression
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_upsell_impression( $display_location, $product_ids ) {
-        // Upsell campaigns are valid on product, cart, and checkout pages
-        $valid_locations = array( 'product-page', 'cart-page', 'checkout-page' );
-
-        if ( ! in_array( $display_location, $valid_locations, true ) ) {
-            return false;
-        }
-
-        // Must have at least 1 product
-        if ( count( $product_ids ) < 1 ) {
-            return false;
-        }
-
-        // Check if we're actually on the correct page type
-        if ( $display_location === 'product-page' && ! is_product() ) {
-            return false;
-        }
-
-        if ( $display_location === 'cart-page' && ! is_cart() ) {
-            return false;
-        }
-
-        if ( $display_location === 'checkout-page' && ! is_checkout() ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate related products campaign impression
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_related_products_impression( $display_location, $product_ids ) {
-        // Related products are typically shown on product pages
-        $valid_locations = array( 'product-page', 'cart-page' );
-
-        if ( ! in_array( $display_location, $valid_locations, true ) ) {
-            return false;
-        }
-
-        // Must have at least 1 product
-        if ( count( $product_ids ) < 1 ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate frequently bought together campaign impression
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_fbt_impression( $display_location, $product_ids ) {
-        // FBT campaigns work best on product and cart pages
-        $valid_locations = array( 'product-page', 'cart-page' );
-
-        if ( ! in_array( $display_location, $valid_locations, true ) ) {
-            return false;
-        }
-
-        // Must have at least 2 products for "bought together" to make sense
-        if ( count( $product_ids ) < 2 ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate trending products campaign impression
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_trending_impression( $display_location, $product_ids ) {
-        // Trending products can be shown on most pages
-        $valid_locations = array( 'home-page', 'product-page', 'cart-page', 'sidebar', 'footer' );
-
-        if ( ! in_array( $display_location, $valid_locations, true ) ) {
-            return false;
-        }
-
-        // Must have at least 1 product
-        if ( count( $product_ids ) < 1 ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate recently viewed campaign impression
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_recently_viewed_impression( $display_location, $product_ids ) {
-        // Recently viewed can be shown on most pages
-        $valid_locations = array( 'home-page', 'product-page', 'cart-page', 'my-account-page', 'sidebar' );
-
-        if ( ! in_array( $display_location, $valid_locations, true ) ) {
-            return false;
-        }
-
-        // Must have at least 1 product
-        if ( count( $product_ids ) < 1 ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Default validation for unknown campaign types
-     *
-     * @param string $display_location Display location
-     * @param array $product_ids Product IDs
-     * @return bool True if valid
-     */
-    private static function validate_default_impression( $display_location, $product_ids ) {
-        // Basic validation - must have at least 1 product
-        if ( count( $product_ids ) < 1 ) {
-            return false;
-        }
-
-        // Allow most display locations for unknown types
-        $invalid_locations = array(); // Could add restricted locations here if needed
-
-        if ( in_array( $display_location, $invalid_locations, true ) ) {
-            return false;
-        }
-
-        return true;
-    }
 
     /**
      * Track click for a campaign
      *
      * @param int $campaign_id Campaign ID
      * @param int $product_id Product ID that was clicked
+     * @param string $campaign_type Campaign type (cross-sell, upsell, etc.)
      * @return bool Success status
      */
-    public static function track_click( $campaign_id, $product_id = null ) {
+    public static function track_click( $campaign_id, $product_id = null, $campaign_type = 'cross-sell' ) {
         if ( empty( $campaign_id ) ) {
+            return false;
+        }
+
+        // Only track clicks for cross-sell campaigns for now
+        if ( $campaign_type !== 'cross-sell' ) {
             return false;
         }
 
         // Get current performance data
         $performance = self::get_campaign_performance( $campaign_id );
-        
+
         // Increment clicks
-        $performance['clicks'] = isset( $performance['clicks'] ) ? $performance['clicks'] + 1 : 1;
-        
+        $performance['clicks'] = isset( $performance['clicks'] ) ? intval($performance['clicks']) + 1 : 1;
+
         // Update last click timestamp
         $performance['last_click'] = current_time( 'mysql' );
-        
+
         // Track which product was clicked
         if ( ! empty( $product_id ) ) {
             if ( ! isset( $performance['product_clicks'] ) ) {
                 $performance['product_clicks'] = array();
             }
-            
+
             if ( ! isset( $performance['product_clicks'][ $product_id ] ) ) {
                 $performance['product_clicks'][ $product_id ] = 0;
             }
@@ -350,10 +188,16 @@ class UPSPR_Performance_Tracker {
      * @param int $campaign_id Campaign ID
      * @param int $product_id Product ID that was purchased
      * @param float $revenue Revenue generated from this conversion
+     * @param string $campaign_type Campaign type (cross-sell, upsell, etc.)
      * @return bool Success status
      */
-    public static function track_conversion( $campaign_id, $product_id = null, $revenue = 0 ) {
+    public static function track_conversion( $campaign_id, $product_id = null, $revenue = 0, $campaign_type = 'cross-sell' ) {
         if ( empty( $campaign_id ) ) {
+            return false;
+        }
+
+        // Only track conversions for cross-sell campaigns for now
+        if ( $campaign_type !== 'cross-sell' ) {
             return false;
         }
 
@@ -443,7 +287,6 @@ class UPSPR_Performance_Tracker {
                 'revenue' => 0
             );
         }
-
         $decoded = json_decode( $performance_data, true );
         return is_array( $decoded ) ? $decoded : array(
             'impressions' => 0,
@@ -462,9 +305,9 @@ class UPSPR_Performance_Tracker {
      */
     public static function update_campaign_performance( $campaign_id, $performance ) {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . 'upspr_recommendation_campaigns';
-        
+
         $result = $wpdb->update(
             $table_name,
             array(
@@ -475,7 +318,7 @@ class UPSPR_Performance_Tracker {
             array( '%s', '%s' ),
             array( '%d' )
         );
-        
+
         return $result !== false;
     }
 
@@ -538,15 +381,14 @@ class UPSPR_Performance_Tracker {
      */
     public static function get_performance_summary( $campaign_id ) {
         $performance = self::get_campaign_performance( $campaign_id );
-        
         return array(
-            'impressions' => $performance['impressions'],
-            'clicks' => $performance['clicks'],
-            'conversions' => $performance['conversions'],
-            'revenue' => $performance['revenue'],
-            'ctr' => self::calculate_ctr( $performance ),
+            'impressions' =>     $performance['impressions'],
+            'clicks' =>          $performance['clicks'],
+            'conversions' =>     $performance['conversions'],
+            'revenue' =>         $performance['revenue'],
+            'ctr' =>             self::calculate_ctr( $performance ),
             'conversion_rate' => self::calculate_conversion_rate( $performance ),
-            'aov' => self::calculate_aov( $performance )
+            'aov' =>             self::calculate_aov( $performance )
         );
     }
 
@@ -573,7 +415,7 @@ class UPSPR_Performance_Tracker {
     public static function init_ajax_tracking() {
         add_action( 'wp_ajax_upspr_track_impression', array( __CLASS__, 'ajax_track_impression' ) );
         add_action( 'wp_ajax_nopriv_upspr_track_impression', array( __CLASS__, 'ajax_track_impression' ) );
-        
+
         add_action( 'wp_ajax_upspr_track_click', array( __CLASS__, 'ajax_track_click' ) );
         add_action( 'wp_ajax_nopriv_upspr_track_click', array( __CLASS__, 'ajax_track_click' ) );
     }
@@ -599,12 +441,13 @@ class UPSPR_Performance_Tracker {
      */
     public static function ajax_track_click() {
         check_ajax_referer( 'upspr_tracking_nonce', 'nonce' );
-        
+
         $campaign_id = intval( $_POST['campaign_id'] );
         $product_id = isset( $_POST['product_id'] ) ? intval( $_POST['product_id'] ) : null;
-        
-        $result = self::track_click( $campaign_id, $product_id );
-        
+        $campaign_type = isset( $_POST['campaign_type'] ) ? sanitize_text_field( $_POST['campaign_type'] ) : 'cross-sell';
+
+        $result = self::track_click( $campaign_id, $product_id, $campaign_type );
+
         wp_send_json_success( array( 'tracked' => $result ) );
     }
 }

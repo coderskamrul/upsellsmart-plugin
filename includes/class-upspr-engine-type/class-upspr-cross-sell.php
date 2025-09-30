@@ -28,12 +28,6 @@ class UPSPR_Cross_Sell {
      */
     public function __construct( $campaign_data = array() ) {
         $this->campaign_data = $campaign_data;
-
-        // Initialize performance tracking AJAX handlers
-        add_action( 'init', array( 'UPSPR_Performance_Tracker', 'init_ajax_tracking' ) );
-
-        // Add tracking scripts to footer
-        add_action( 'wp_footer', array( $this, 'add_tracking_scripts' ) );
     }
 
     /**
@@ -687,38 +681,7 @@ class UPSPR_Cross_Sell {
         return $formatted;
     }
 
-    /**
-     * Add tracking scripts to footer
-     */
-    public function add_tracking_scripts() {
-        if ( empty( $this->campaign_data ) ) {
-            return;
-        }
-        ?>
-        <script type="text/javascript">
-        jQuery(document).ready(function($) {
-            // Track clicks on recommendation products
-            $('.upspr-cross-sell-widget .upspr-product-item a, .upspr-cross-sell-widget .add_to_cart_button').on('click', function() {
-                var campaignId = $(this).closest('.upspr-campaign-widget').data('campaign-id');
-                var productId = $(this).closest('.upspr-product-item').find('.add_to_cart_button').data('product_id');
 
-                if (campaignId && productId) {
-                    $.ajax({
-                        url: '<?php echo admin_url( 'admin-ajax.php' ); ?>',
-                        type: 'POST',
-                        data: {
-                            action: 'upspr_track_click',
-                            campaign_id: campaignId,
-                            product_id: productId,
-                            nonce: '<?php echo wp_create_nonce( 'upspr_tracking_nonce' ); ?>'
-                        }
-                    });
-                }
-            });
-        });
-        </script>
-        <?php
-    }
 
     /**
      * Get fallback recommendations when current product ID cannot be determined

@@ -217,12 +217,12 @@ class UPSPR_Location_Display {
      * @param bool $show_category Show product category
      */
     private static function render_product_item( $product, $show_prices, $show_ratings, $show_add_to_cart, $show_category ) {
-        echo '<div class="upspr-product-item">';
+        echo '<div class="upspr-product-item" data-product-id="' . esc_attr( $product['id'] ) . '">';
         
         // Product image
         if ( ! empty( $product['image'] ) ) {
             echo '<div class="upspr-product-image">';
-            echo '<a href="' . esc_url( $product['url'] ) . '">';
+            echo '<a href="' . esc_url( $product['url'] ) . '" class="upspr-product-link">';
             echo '<img src="' . esc_url( $product['image'][0] ) . '" alt="' . esc_attr( $product['name'] ) . '">';
             echo '</a>';
             echo '</div>';
@@ -232,7 +232,7 @@ class UPSPR_Location_Display {
         
         // Product name
         echo '<h4 class="upspr-product-name">';
-        echo '<a href="' . esc_url( $product['url'] ) . '">' . esc_html( $product['name'] ) . '</a>';
+        echo '<a href="' . esc_url( $product['url'] ) . '" class="upspr-product-link">' . esc_html( $product['name'] ) . '</a>';
         echo '</h4>';
         
         // Product category
@@ -255,7 +255,7 @@ class UPSPR_Location_Display {
         // Add to cart button
         if ( $show_add_to_cart ) {
             echo '<div class="upspr-add-to-cart">';
-            echo '<a href="?add-to-cart=' . esc_attr( $product['id'] ) . '" class="button add_to_cart_button" data-product_id="' . esc_attr( $product['id'] ) . '">';
+            echo '<a href="?add-to-cart=' . esc_attr( $product['id'] ) . '" class="button add_to_cart_button upspr-add-to-cart-btn" data-product_id="' . esc_attr( $product['id'] ) . '">';
             echo __( 'Add to Cart', 'upsellsmart' );
             echo '</a>';
             echo '</div>';

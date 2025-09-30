@@ -117,6 +117,11 @@ class UPSPR_Product_Recommendations {
             UPSPR_Recommendations::get_instance();
             UPSPR_Frontend::get_instance();
             UPSPR_Settings::get_instance();
+
+            // Initialize cross-sell integration for conversion tracking
+            if ( class_exists( 'UPSPR_Cross_Sell_Integration' ) ) {
+                UPSPR_Cross_Sell_Integration::init();
+            }
         } catch ( Exception $e ) {
             error_log( 'UpSellSmart Plugin Error: ' . $e->getMessage() );
         }

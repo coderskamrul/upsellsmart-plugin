@@ -37,6 +37,11 @@ class UPSPR_Frontend {
     private function init() {
         // Enqueue frontend scripts and styles
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
+
+        // Initialize AJAX tracking handlers immediately
+        if ( class_exists( 'UPSPR_Performance_Tracker' ) ) {
+            UPSPR_Performance_Tracker::init_ajax_tracking();
+        }
     }
 
     /**
@@ -50,7 +55,7 @@ class UPSPR_Frontend {
 
         wp_enqueue_style(
             'upspr-frontend',
-            UPSPR_PLUGIN_URL . 'css/frontend.css',
+            UPSPR_PLUGIN_URL . 'assets/dist/css/frontend.css',
             array(),
             UPSPR_VERSION
         );
@@ -63,12 +68,21 @@ class UPSPR_Frontend {
             UPSPR_VERSION
         );
 
+        // Enqueue campaign tracking JavaScript
         wp_enqueue_script(
-            'upspr-frontend',
-            UPSPR_PLUGIN_URL . 'js/frontend.js',
+            'upspr-campaign-tracking',
+            UPSPR_PLUGIN_URL . 'assets/dist/js/frontend.js',
             array( 'jquery' ),
             UPSPR_VERSION,
             true
         );
+
+        // Localize script for AJAX tracking
+        wp_localize_script( 'upspr-campaign-tracking', 'upspr_frontend', array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce' => wp_create_nonce( 'upspr_tracking_nonce' ),
+            'rest_url' => rest_url( 'upspr/v1/' ),
+            'track_events' => true
+        ) );
     }
 }
