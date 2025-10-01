@@ -12,42 +12,42 @@ class UPSPR_Cross_Sell_Integration {
     /**
      * Initialize integration
      */
-    public static function init() {
+    public static function upspr_init() {
 
         // Hook into WordPress init to process active cross-sell campaigns
-        add_action( 'wp', array( __CLASS__, 'process_active_campaigns' ) );
+        add_action( 'wp', array( __CLASS__, 'upspr_process_active_campaigns' ) );
         // Hook into WooCommerce order completion to track conversions
-        add_action( 'woocommerce_order_status_completed', array( __CLASS__, 'track_conversions' ) );
-        add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'track_conversions' ) );
+        add_action( 'woocommerce_order_status_completed', array( __CLASS__, 'upspr_track_conversions' ) );
+        add_action( 'woocommerce_order_status_processing', array( __CLASS__, 'upspr_track_conversions' ) );
 
         // Add AJAX handler for storing campaign interactions
-        add_action( 'wp_ajax_upspr_store_campaign_interaction', array( __CLASS__, 'ajax_store_campaign_interaction' ) );
-        add_action( 'wp_ajax_nopriv_upspr_store_campaign_interaction', array( __CLASS__, 'ajax_store_campaign_interaction' ) );
+        add_action( 'wp_ajax_upspr_store_campaign_interaction', array( __CLASS__, 'upspr_ajax_store_campaign_interaction' ) );
+        add_action( 'wp_ajax_nopriv_upspr_store_campaign_interaction', array( __CLASS__, 'upspr_ajax_store_campaign_interaction' ) );
 
         // Add test AJAX handler
-        add_action( 'wp_ajax_upspr_test_conversion_tracking', array( __CLASS__, 'test_conversion_tracking' ) );
+        add_action( 'wp_ajax_upspr_test_conversion_tracking', array( __CLASS__, 'upspr_test_conversion_tracking' ) );
 
     }
 
     /**
      * Process active cross-sell campaigns
      */
-    public static function process_active_campaigns() {
+    public static function upspr_process_active_campaigns() {
         // Only process on frontend
         if ( is_admin() ) {
             return;
         }
 
         // Get active cross-sell campaigns
-        $campaigns = self::get_active_cross_sell_campaigns();
-        
+        $campaigns = self::upspr_get_active_cross_sell_campaigns();
+
         if ( empty( $campaigns ) ) {
             return;
         }
 
         foreach ( $campaigns as $campaign ) {
             $cross_sell = new UPSPR_Cross_Sell( $campaign );
-            $cross_sell->process();
+            $cross_sell->upspr_process();
         }
     }
 
@@ -56,7 +56,7 @@ class UPSPR_Cross_Sell_Integration {
      *
      * @return array Array of active campaigns
      */
-    private static function get_active_cross_sell_campaigns() {
+    private static function upspr_get_active_cross_sell_campaigns() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'upspr_recommendation_campaigns';
@@ -102,7 +102,7 @@ class UPSPR_Cross_Sell_Integration {
      *
      * @param int $order_id Order ID
      */
-    public static function track_conversions( $order_id ) {
+    public static function upspr_track_conversions( $order_id ) {
         $order = wc_get_order( $order_id );
 
         if ( ! $order ) {
@@ -122,7 +122,7 @@ class UPSPR_Cross_Sell_Integration {
             $line_total = $item->get_total();
             
             // Check if this product was recently shown in cross-sell campaigns
-            self::check_and_track_product_conversion( $product_id, $quantity, $line_total, $customer_id );
+            self::upspr_check_and_track_product_conversion( $product_id, $quantity, $line_total, $customer_id );
         }
     }
 
@@ -134,13 +134,13 @@ class UPSPR_Cross_Sell_Integration {
      * @param float $line_total Line total
      * @param int $customer_id Customer ID
      */
-    private static function check_and_track_product_conversion( $product_id, $quantity, $line_total, $customer_id ) {
+    private static function upspr_check_and_track_product_conversion( $product_id, $quantity, $line_total, $customer_id ) {
         // Check if we have session data indicating which campaign this product was clicked from
-        $campaign_id = self::get_campaign_from_session( $product_id );
+        $campaign_id = self::upspr_get_campaign_from_session( $product_id );
 
         if ( $campaign_id ) {
             // We have specific campaign attribution data
-            UPSPR_Performance_Tracker::track_conversion(
+            UPSPR_Performance_Tracker::upspr_track_conversion(
                 $campaign_id,
                 $product_id,
                 $line_total,
@@ -148,15 +148,15 @@ class UPSPR_Cross_Sell_Integration {
             );
 
             // Clear the session data to prevent double counting
-            self::clear_campaign_session_data( $product_id );
+            self::upspr_clear_campaign_session_data( $product_id );
         } else {
             // Fallback to the original logic for products without specific attribution
-            $campaigns = self::get_active_cross_sell_campaigns();
+            $campaigns = self::upspr_get_active_cross_sell_campaigns();
 
             foreach ( $campaigns as $campaign ) {
                 // Simple check: if the product could have been recommended by this campaign
-                if ( self::could_campaign_recommend_product( $campaign, $product_id ) ) {
-                    UPSPR_Performance_Tracker::track_conversion(
+                if ( self::upspr_could_campaign_recommend_product( $campaign, $product_id ) ) {
+                    UPSPR_Performance_Tracker::upspr_track_conversion(
                         $campaign['id'],
                         $product_id,
                         $line_total,
@@ -174,7 +174,7 @@ class UPSPR_Cross_Sell_Integration {
      * @param int $product_id Product ID
      * @return int|false Campaign ID or false if not found
      */
-    private static function get_campaign_from_session( $product_id ) {
+    private static function upspr_get_campaign_from_session( $product_id ) {
         // Check if we have session data from JavaScript
         // This would typically be stored via AJAX when a user clicks on a recommendation
 
@@ -194,7 +194,7 @@ class UPSPR_Cross_Sell_Integration {
      *
      * @param int $product_id Product ID
      */
-    private static function clear_campaign_session_data( $product_id ) {
+    private static function upspr_clear_campaign_session_data( $product_id ) {
         $session_key = 'upspr_campaign_' . $product_id . '_' . session_id();
         delete_transient( $session_key );
     }
@@ -206,17 +206,17 @@ class UPSPR_Cross_Sell_Integration {
      * @param int $product_id Product ID
      * @return bool Whether campaign could recommend this product
      */
-    private static function could_campaign_recommend_product( $campaign, $product_id ) {
+    private static function upspr_could_campaign_recommend_product( $campaign, $product_id ) {
         // This is a simplified check
         // In reality, you'd run the same filtering logic as the recommendation engine
-        
+
         $filters = isset( $campaign['filters'] ) ? $campaign['filters'] : array();
-        
+
         // Check if product is excluded
         if ( isset( $filters['excludeProducts'] ) && in_array( $product_id, $filters['excludeProducts'] ) ) {
             return false;
         }
-        
+
         // Check category filters
         if ( isset( $filters['includeCategories'] ) && ! empty( $filters['includeCategories'] ) ) {
             $product_categories = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
@@ -224,7 +224,7 @@ class UPSPR_Cross_Sell_Integration {
                 return false;
             }
         }
-        
+
         // Check excluded categories
         if ( isset( $filters['excludeCategories'] ) && ! empty( $filters['excludeCategories'] ) ) {
             $product_categories = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
@@ -232,7 +232,7 @@ class UPSPR_Cross_Sell_Integration {
                 return false;
             }
         }
-        
+
         return true; // Passed basic checks
     }
 
@@ -242,8 +242,8 @@ class UPSPR_Cross_Sell_Integration {
      * @param int $campaign_id Campaign ID
      * @return array Performance summary
      */
-    public static function get_campaign_performance_summary( $campaign_id ) {
-        return UPSPR_Performance_Tracker::get_performance_summary( $campaign_id );
+    public static function upspr_get_campaign_performance_summary( $campaign_id ) {
+        return UPSPR_Performance_Tracker::upspr_get_performance_summary( $campaign_id );
     }
 
     /**
@@ -252,8 +252,8 @@ class UPSPR_Cross_Sell_Integration {
      * @param int $campaign_id Campaign ID
      * @return bool Success status
      */
-    public static function reset_campaign_performance( $campaign_id ) {
-        return UPSPR_Performance_Tracker::reset_campaign_performance( $campaign_id );
+    public static function upspr_reset_campaign_performance( $campaign_id ) {
+        return UPSPR_Performance_Tracker::upspr_reset_campaign_performance( $campaign_id );
     }
 
     /**
@@ -261,13 +261,13 @@ class UPSPR_Cross_Sell_Integration {
      *
      * @return array Array of campaigns with performance data
      */
-    public static function get_campaigns_with_performance() {
-        $campaigns = self::get_active_cross_sell_campaigns();
-        
+    public static function upspr_get_campaigns_with_performance() {
+        $campaigns = self::upspr_get_active_cross_sell_campaigns();
+
         foreach ( $campaigns as &$campaign ) {
-            $campaign['performance_summary'] = self::get_campaign_performance_summary( $campaign['id'] );
+            $campaign['performance_summary'] = self::upspr_get_campaign_performance_summary( $campaign['id'] );
         }
-        
+
         return $campaigns;
     }
 
@@ -276,7 +276,7 @@ class UPSPR_Cross_Sell_Integration {
      *
      * @return array Test results
      */
-    public static function test_cross_sell_functionality() {
+    public static function upspr_test_cross_sell_functionality() {
         // Create a test campaign data structure
         $test_campaign = array(
             'id' => 999,
@@ -323,7 +323,7 @@ class UPSPR_Cross_Sell_Integration {
     /**
      * AJAX handler for storing campaign interactions
      */
-    public static function ajax_store_campaign_interaction() {
+    public static function upspr_ajax_store_campaign_interaction() {
         check_ajax_referer( 'upspr_tracking_nonce', 'nonce' );
 
         $campaign_id = intval( $_POST['campaign_id'] );
@@ -353,7 +353,7 @@ class UPSPR_Cross_Sell_Integration {
      * Test function to manually trigger conversion tracking
      * This can be called via admin-ajax.php for testing
      */
-    public static function test_conversion_tracking() {
+    public static function upspr_test_conversion_tracking() {
         echo '<pre>'; print_r('Testing conversion tracking...'); echo '</pre>';
 
         // Simulate an order with some products
@@ -362,8 +362,8 @@ class UPSPR_Cross_Sell_Integration {
         $test_line_total = 29.99;
         $test_customer_id = 1;
 
-        echo '<pre>'; print_r('Calling check_and_track_product_conversion...'); echo '</pre>';
-        self::check_and_track_product_conversion( $test_product_id, 1, $test_line_total, $test_customer_id );
+        echo '<pre>'; print_r('Calling upspr_check_and_track_product_conversion...'); echo '</pre>';
+        self::upspr_check_and_track_product_conversion( $test_product_id, 1, $test_line_total, $test_customer_id );
 
         echo '<pre>'; print_r('Test completed'); echo '</pre>';
     }

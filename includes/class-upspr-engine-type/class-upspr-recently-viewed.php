@@ -19,21 +19,21 @@ class UPSPR_Recently_Viewed {
      */
     public function __construct( $campaign_data = array() ) {
         $this->campaign_data = $campaign_data;
-        $this->init_hooks();
+        $this->upspr_init_hooks();
     }
 
     /**
      * Initialize hooks
      */
-    private function init_hooks() {
+    private function upspr_init_hooks() {
         // Track product views
-        add_action( 'woocommerce_single_product_summary', array( $this, 'track_product_view' ), 5 );
+        add_action( 'woocommerce_single_product_summary', array( $this, 'upspr_track_product_view' ), 5 );
     }
 
     /**
      * Track product view
      */
-    public function track_product_view() {
+    public function upspr_track_product_view() {
         global $product;
         
         if ( ! $product ) {
@@ -41,7 +41,7 @@ class UPSPR_Recently_Viewed {
         }
 
         $product_id = $product->get_id();
-        $recently_viewed = $this->get_recently_viewed_products();
+        $recently_viewed = $this->upspr_get_recently_viewed_products();
         
         // Remove current product if already in list
         $recently_viewed = array_diff( $recently_viewed, array( $product_id ) );
@@ -59,7 +59,7 @@ class UPSPR_Recently_Viewed {
     /**
      * Process recently viewed campaign
      */
-    public function process() {
+    public function upspr_process() {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
@@ -70,12 +70,12 @@ class UPSPR_Recently_Viewed {
             return false;
         }
 
-        $recommendations = $this->get_recently_viewed_recommendations( $recently_viewed );
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $recommendations = $this->upspr_get_recently_viewed_recommendations( $recently_viewed );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Display the campaign using the location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
+            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
         }
 
         return $formatted_recommendations;
@@ -84,7 +84,7 @@ class UPSPR_Recently_Viewed {
     /**
      * Get recently viewed recommendations
      */
-    private function get_recently_viewed_recommendations( $recently_viewed ) {
+    private function upspr_get_recently_viewed_recommendations( $recently_viewed ) {
         $recommendations = array();
 
         return $recommendations;
@@ -93,7 +93,7 @@ class UPSPR_Recently_Viewed {
     /**
      * Get current product ID
      */
-    private function get_current_product_id() {
+    private function upspr_get_current_product_id() {
         global $product, $post;
         
         // Method 1: Try global $product if it's a valid WC_Product object
@@ -136,7 +136,7 @@ class UPSPR_Recently_Viewed {
     /**
      * Format recommendations
      */
-    private function format_recommendations( $product_ids ) {
+    private function upspr_format_recommendations( $product_ids ) {
         $formatted = array();
         if ( empty( $product_ids ) ) {
             return $formatted;
@@ -163,7 +163,7 @@ class UPSPR_Recently_Viewed {
      *
      * @return string HTML output or empty string if no recommendations
      */
-    public function render() {
+    public function upspr_render() {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
@@ -175,9 +175,9 @@ class UPSPR_Recently_Viewed {
             return '';
         }
 
-        $formatted_recommendations = $this->format_recommendations( $recently_viewed );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recently_viewed );
         if ( ! empty( $formatted_recommendations ) ) {
-            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
+            return UPSPR_Location_Display::upspr_get_campaign_html( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
         }
 
         return '';

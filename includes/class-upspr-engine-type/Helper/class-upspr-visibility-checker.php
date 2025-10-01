@@ -16,78 +16,78 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return bool Whether campaign should be visible
      */
-    public static function should_display_campaign( $visibility_config, $user_id = null ) {
+    public static function upspr_should_display_campaign( $visibility_config, $user_id = null ) {
         if ( empty( $visibility_config ) ) {
             return true; // No restrictions, show campaign
         }
 
         // Check date range
-        if ( ! self::check_date_range( $visibility_config ) ) {
+        if ( ! self::upspr_check_date_range( $visibility_config ) ) {
             return false;
         }
 
         // Check days of week
-        if ( ! self::check_days_of_week( $visibility_config ) ) {
+        if ( ! self::upspr_check_days_of_week( $visibility_config ) ) {
             return false;
         }
 
         // Check time range
-        if ( ! self::check_time_range( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_time_range'); echo '</pre>';
+        if ( ! self::upspr_check_time_range( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_time_range'); echo '</pre>';
             return false;
         }
 
         // Check user login status
-        if ( ! self::check_user_login_status( $visibility_config, $user_id ) ) {
-            echo '<pre>'; print_r('check_user_login_status'); echo '</pre>';
+        if ( ! self::upspr_check_user_login_status( $visibility_config, $user_id ) ) {
+            echo '<pre>'; print_r('upspr_check_user_login_status'); echo '</pre>';
             return false;
         }
 
         // Check user roles
-        if ( ! self::check_user_roles( $visibility_config, $user_id ) ) {
-            echo '<pre>'; print_r('check_user_roles'); echo '</pre>';
+        if ( ! self::upspr_check_user_roles( $visibility_config, $user_id ) ) {
+            echo '<pre>'; print_r('upspr_check_user_roles'); echo '</pre>';
             return false;
         }
 
         // Check minimum orders
-        if ( ! self::check_minimum_orders( $visibility_config, $user_id ) ) {
-            echo '<pre>'; print_r('check_minimum_orders'); echo '</pre>';
+        if ( ! self::upspr_check_minimum_orders( $visibility_config, $user_id ) ) {
+            echo '<pre>'; print_r('upspr_check_minimum_orders'); echo '</pre>';
             return false;
         }
 
         // Check minimum spent
-        if ( ! self::check_minimum_spent( $visibility_config, $user_id ) ) {
-            echo '<pre>'; print_r('check_minimum_spent'); echo '</pre>';
+        if ( ! self::upspr_check_minimum_spent( $visibility_config, $user_id ) ) {
+            echo '<pre>'; print_r('upspr_check_minimum_spent'); echo '</pre>';
             return false;
         }
 
         // Check device type
-        if ( ! self::check_device_type( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_device_type'); echo '</pre>';
+        if ( ! self::upspr_check_device_type( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_device_type'); echo '</pre>';
             return false;
         }
 
         // Check cart value range
-        if ( ! self::check_cart_value_range( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_cart_value_range'); echo '</pre>';
+        if ( ! self::upspr_check_cart_value_range( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_cart_value_range'); echo '</pre>';
             return false;
         }
 
         // Check cart items count
-        if ( ! self::check_cart_items_count( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_cart_items_count'); echo '</pre>';
+        if ( ! self::upspr_check_cart_items_count( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_cart_items_count'); echo '</pre>';
             return false;
         }
 
         // Check required products in cart
-        if ( ! self::check_required_products_in_cart( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_required_products_in_cart'); echo '</pre>';
+        if ( ! self::upspr_check_required_products_in_cart( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_required_products_in_cart'); echo '</pre>';
             return false;
         }
 
         // Check required categories in cart
-        if ( ! self::check_required_categories_in_cart( $visibility_config ) ) {
-            echo '<pre>'; print_r('check_required_categories_in_cart'); echo '</pre>';
+        if ( ! self::upspr_check_required_categories_in_cart( $visibility_config ) ) {
+            echo '<pre>'; print_r('upspr_check_required_categories_in_cart'); echo '</pre>';
             return false;
         }
 
@@ -100,7 +100,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_date_range( $visibility_config ) {
+    private static function upspr_check_date_range( $visibility_config ) {
         $start_date = isset( $visibility_config['startDate'] ) ? $visibility_config['startDate'] : '';
         $end_date = isset( $visibility_config['endDate'] ) ? $visibility_config['endDate'] : '';
 
@@ -127,7 +127,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_days_of_week( $visibility_config ) {
+    private static function upspr_check_days_of_week( $visibility_config ) {
         if ( ! isset( $visibility_config['daysOfWeek'] ) || empty( $visibility_config['daysOfWeek'] ) ) {
             return true; // No day restrictions
         }
@@ -144,7 +144,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_time_range( $visibility_config ) {
+    private static function upspr_check_time_range( $visibility_config ) {
         if ( ! isset( $visibility_config['timeRange'] ) || empty( $visibility_config['timeRange'] ) ) {
             return true; // No time restrictions
         }
@@ -178,7 +178,7 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID
      * @return bool Whether campaign should be visible
      */
-    private static function check_user_login_status( $visibility_config, $user_id = null ) {
+    private static function upspr_check_user_login_status( $visibility_config, $user_id = null ) {
         $login_status = isset( $visibility_config['userLoginStatus'] ) ? $visibility_config['userLoginStatus'] : 'any';
 
         if ( $login_status === 'any' ) {
@@ -204,7 +204,7 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID
      * @return bool Whether campaign should be visible
      */
-    private static function check_user_roles( $visibility_config, $user_id = null ) {
+    private static function upspr_check_user_roles( $visibility_config, $user_id = null ) {
         $required_roles = isset( $visibility_config['userRoles'] ) ? $visibility_config['userRoles'] : '';
         if ( empty( $required_roles ) || $required_roles === 'all-roles' ) {
             return true; // No role restrictions
@@ -239,7 +239,7 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID
      * @return bool Whether campaign should be visible
      */
-    private static function check_minimum_orders( $visibility_config, $user_id = null ) {
+    private static function upspr_check_minimum_orders( $visibility_config, $user_id = null ) {
         $minimum_orders = isset( $visibility_config['minimumOrders'] ) ? intval( $visibility_config['minimumOrders'] ) : 0;
 
         if ( $minimum_orders <= 0 ) {
@@ -263,7 +263,7 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID
      * @return bool Whether campaign should be visible
      */
-    private static function check_minimum_spent( $visibility_config, $user_id = null ) {
+    private static function upspr_check_minimum_spent( $visibility_config, $user_id = null ) {
         $minimum_spent = isset( $visibility_config['minimumSpent'] ) ? floatval( $visibility_config['minimumSpent'] ) : 0;
 
         if ( $minimum_spent <= 0 ) {
@@ -286,13 +286,13 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_device_type( $visibility_config ) {
+    private static function upspr_check_device_type( $visibility_config ) {
         if ( ! isset( $visibility_config['deviceType'] ) || empty( $visibility_config['deviceType'] ) ) {
             return true; // No device restrictions
         }
 
         $allowed_devices = $visibility_config['deviceType'];
-        $current_device = self::detect_device_type();
+        $current_device = self::upspr_detect_device_type();
 
         return isset( $allowed_devices[ $current_device ] ) && $allowed_devices[ $current_device ];
     }
@@ -303,7 +303,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_cart_value_range( $visibility_config ) {
+    private static function upspr_check_cart_value_range( $visibility_config ) {
         if ( ! isset( $visibility_config['cartValueRange'] ) || empty( $visibility_config['cartValueRange'] ) ) {
             return true; // No cart value restrictions
         }
@@ -339,7 +339,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_cart_items_count( $visibility_config ) {
+    private static function upspr_check_cart_items_count( $visibility_config ) {
         if ( ! isset( $visibility_config['cartItemsCount'] ) || empty( $visibility_config['cartItemsCount'] ) ) {
             return true; // No cart items count restrictions
         }
@@ -375,7 +375,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_required_products_in_cart( $visibility_config ) {
+    private static function upspr_check_required_products_in_cart( $visibility_config ) {
         if ( ! isset( $visibility_config['requiredProductsInCart'] ) || empty( $visibility_config['requiredProductsInCart'] ) ) {
             return true; // No required products
         }
@@ -407,7 +407,7 @@ class UPSPR_Visibility_Checker {
      * @param array $visibility_config Visibility configuration
      * @return bool Whether campaign should be visible
      */
-    private static function check_required_categories_in_cart( $visibility_config ) {
+    private static function upspr_check_required_categories_in_cart( $visibility_config ) {
         if ( ! isset( $visibility_config['requiredCategoriesInCart'] ) || empty( $visibility_config['requiredCategoriesInCart'] ) ) {
             return true; // No required categories
         }
@@ -443,7 +443,7 @@ class UPSPR_Visibility_Checker {
      *
      * @return string Device type (desktop, mobile, tablet)
      */
-    private static function detect_device_type() {
+    private static function upspr_detect_device_type() {
         if ( ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
             return 'desktop';
         }
@@ -469,20 +469,20 @@ class UPSPR_Visibility_Checker {
      * @param int $user_id User ID
      * @return array Visibility status for each rule
      */
-    public static function get_visibility_status( $visibility_config, $user_id = null ) {
+    public static function upspr_get_visibility_status( $visibility_config, $user_id = null ) {
         return array(
-            'date_range' => self::check_date_range( $visibility_config ),
-            'days_of_week' => self::check_days_of_week( $visibility_config ),
-            'time_range' => self::check_time_range( $visibility_config ),
-            'user_login_status' => self::check_user_login_status( $visibility_config, $user_id ),
-            'user_roles' => self::check_user_roles( $visibility_config, $user_id ),
-            'minimum_orders' => self::check_minimum_orders( $visibility_config, $user_id ),
-            'minimum_spent' => self::check_minimum_spent( $visibility_config, $user_id ),
-            'device_type' => self::check_device_type( $visibility_config ),
-            'cart_value_range' => self::check_cart_value_range( $visibility_config ),
-            'cart_items_count' => self::check_cart_items_count( $visibility_config ),
-            'required_products_in_cart' => self::check_required_products_in_cart( $visibility_config ),
-            'required_categories_in_cart' => self::check_required_categories_in_cart( $visibility_config ),
+            'date_range' => self::upspr_check_date_range( $visibility_config ),
+            'days_of_week' => self::upspr_check_days_of_week( $visibility_config ),
+            'time_range' => self::upspr_check_time_range( $visibility_config ),
+            'user_login_status' => self::upspr_check_user_login_status( $visibility_config, $user_id ),
+            'user_roles' => self::upspr_check_user_roles( $visibility_config, $user_id ),
+            'minimum_orders' => self::upspr_check_minimum_orders( $visibility_config, $user_id ),
+            'minimum_spent' => self::upspr_check_minimum_spent( $visibility_config, $user_id ),
+            'device_type' => self::upspr_check_device_type( $visibility_config ),
+            'cart_value_range' => self::upspr_check_cart_value_range( $visibility_config ),
+            'cart_items_count' => self::upspr_check_cart_items_count( $visibility_config ),
+            'required_products_in_cart' => self::upspr_check_required_products_in_cart( $visibility_config ),
+            'required_categories_in_cart' => self::upspr_check_required_categories_in_cart( $visibility_config ),
         );
     }
 }

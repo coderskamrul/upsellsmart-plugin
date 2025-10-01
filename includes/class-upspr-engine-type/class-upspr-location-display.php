@@ -94,7 +94,7 @@ class UPSPR_Location_Display {
      * @param string $campaign_type Campaign type (cross-sell, upsell, etc.)
      * @return bool True if displayed successfully, false otherwise
      */
-    public static function display_campaign( $campaign_data, $recommendations, $campaign_type = '' ) {
+    public static function upspr_display_campaign( $campaign_data, $recommendations, $campaign_type = '' ) {
         //if ( empty( $campaign_data ) || empty( $recommendations ) ) {
         if ( empty( $campaign_data ) ) {
             return false;
@@ -108,18 +108,18 @@ class UPSPR_Location_Display {
         }
 
         // Validate that the hook location is valid for the display location
-        if ( ! self::is_valid_hook_for_location( $display_location, $hook_location ) ) {
+        if ( ! self::upspr_is_valid_hook_for_location( $display_location, $hook_location ) ) {
             return false;
         }
 
         // Check if we should display on current page
-        if ( ! self::should_display_on_current_page( $display_location ) ) {
+        if ( ! self::upspr_should_display_on_current_page( $display_location ) ) {
             return false;
         }
 
         // Add the hook to display the campaign
         add_action( $hook_location, function() use ( $campaign_data, $recommendations, $campaign_type ) {
-            self::render_campaign_widget( $campaign_data, $recommendations, $campaign_type );
+            self::upspr_render_campaign_widget( $campaign_data, $recommendations, $campaign_type );
         }, 10 );
 
         return true;
@@ -132,7 +132,7 @@ class UPSPR_Location_Display {
      * @param string $hook_location Hook location
      * @return bool True if valid, false otherwise
      */
-    private static function is_valid_hook_for_location( $display_location, $hook_location ) {
+    private static function upspr_is_valid_hook_for_location( $display_location, $hook_location ) {
         if ( ! isset( self::$location_hooks[ $display_location ] ) ) {
             return false;
         }
@@ -146,7 +146,7 @@ class UPSPR_Location_Display {
      * @param string $display_location Display location
      * @return bool True if should display, false otherwise
      */
-    private static function should_display_on_current_page( $display_location ) {
+    private static function upspr_should_display_on_current_page( $display_location ) {
         switch ( $display_location ) {
             case 'home-page':
                 return is_front_page() || is_home();
@@ -180,9 +180,9 @@ class UPSPR_Location_Display {
      * @param array $recommendations Recommendations to display
      * @param string $campaign_type Campaign type
      */
-    private static function render_campaign_widget( $campaign_data, $recommendations, $campaign_type ) {
+    private static function upspr_render_campaign_widget( $campaign_data, $recommendations, $campaign_type ) {
         $basic_info = isset( $campaign_data['basic_info'] ) ? $campaign_data['basic_info'] : array();
-        
+
         // Get widget settings
         $show_prices = isset( $basic_info['showProductPrices'] ) ? $basic_info['showProductPrices'] : true;
         $show_ratings = isset( $basic_info['showProductRatings'] ) ? $basic_info['showProductRatings'] : true;
@@ -192,17 +192,17 @@ class UPSPR_Location_Display {
 
         // Start widget output
         echo '<div class="upspr-campaign-widget upspr-' . esc_attr( $campaign_type ) . '-widget" data-campaign-id="' . esc_attr( $campaign_data['id'] ) . '">';
-        
+
         if ( ! empty( $rule_name ) ) {
             echo '<h3 class="upspr-widget-title">' . esc_html( $rule_name ) . '</h3>';
         }
-        
+
         echo '<div class="upspr-products-grid">';
-        
+
         foreach ( $recommendations as $product ) {
-            self::render_product_item( $product, $show_prices, $show_ratings, $show_add_to_cart, $show_category );
+            self::upspr_render_product_item( $product, $show_prices, $show_ratings, $show_add_to_cart, $show_category );
         }
-        
+
         echo '</div>';
         echo '</div>';
     }
@@ -216,7 +216,7 @@ class UPSPR_Location_Display {
      * @param bool $show_add_to_cart Show add to cart button
      * @param bool $show_category Show product category
      */
-    private static function render_product_item( $product, $show_prices, $show_ratings, $show_add_to_cart, $show_category ) {
+    private static function upspr_render_product_item( $product, $show_prices, $show_ratings, $show_add_to_cart, $show_category ) {
         echo '<div class="upspr-product-item" data-product-id="' . esc_attr( $product['id'] ) . '">';
         
         // Product image
@@ -271,7 +271,7 @@ class UPSPR_Location_Display {
      * @param string $display_location Display location
      * @return array Available hooks
      */
-    public static function get_hooks_for_location( $display_location ) {
+    public static function upspr_get_hooks_for_location( $display_location ) {
         return isset( self::$location_hooks[ $display_location ] ) ? self::$location_hooks[ $display_location ] : array();
     }
 
@@ -280,7 +280,7 @@ class UPSPR_Location_Display {
      *
      * @return array Display locations
      */
-    public static function get_display_locations() {
+    public static function upspr_get_display_locations() {
         return array_keys( self::$location_hooks );
     }
 
@@ -290,7 +290,7 @@ class UPSPR_Location_Display {
      * @param string $location Location key
      * @return string Location label
      */
-    public static function get_location_label( $location ) {
+    public static function upspr_get_location_label( $location ) {
         $labels = array(
             'home-page' => __( 'Home Page', 'upsellsmart' ),
             'product-page' => __( 'Product Page', 'upsellsmart' ),
@@ -312,8 +312,8 @@ class UPSPR_Location_Display {
      * @param string $hook_location Hook location
      * @return string Hook location label
      */
-    public static function get_hook_label( $display_location, $hook_location ) {
-        $hooks = self::get_hooks_for_location( $display_location );
+    public static function upspr_get_hook_label( $display_location, $hook_location ) {
+        $hooks = self::upspr_get_hooks_for_location( $display_location );
         return isset( $hooks[ $hook_location ] ) ? $hooks[ $hook_location ] : $hook_location;
     }
 
@@ -323,7 +323,7 @@ class UPSPR_Location_Display {
      * @param string $display_location Display location
      * @return string Default hook location
      */
-    public static function get_default_hook( $display_location ) {
+    public static function upspr_get_default_hook( $display_location ) {
         $defaults = array(
             'home-page' => 'the_content',
             'product-page' => 'woocommerce_product_meta_end',
@@ -344,7 +344,7 @@ class UPSPR_Location_Display {
      * @param array $campaign_data Campaign data
      * @return bool True if valid, false otherwise
      */
-    public static function validate_campaign_data( $campaign_data ) {
+    public static function upspr_validate_campaign_data( $campaign_data ) {
         if ( empty( $campaign_data ) || ! isset( $campaign_data['basic_info'] ) ) {
             return false;
         }
@@ -355,7 +355,7 @@ class UPSPR_Location_Display {
             return false;
         }
 
-        return self::is_valid_hook_for_location( $basic_info['displayLocation'], $basic_info['hookLocation'] );
+        return self::upspr_is_valid_hook_for_location( $basic_info['displayLocation'], $basic_info['hookLocation'] );
     }
 
     /**
@@ -366,9 +366,9 @@ class UPSPR_Location_Display {
      * @param string $campaign_type Campaign type
      * @return string HTML output
      */
-    public static function get_campaign_html( $campaign_data, $recommendations, $campaign_type = '' ) {
+    public static function upspr_get_campaign_html( $campaign_data, $recommendations, $campaign_type = '' ) {
         ob_start();
-        self::render_campaign_widget( $campaign_data, $recommendations, $campaign_type );
+        self::upspr_render_campaign_widget( $campaign_data, $recommendations, $campaign_type );
         return ob_get_clean();
     }
 }

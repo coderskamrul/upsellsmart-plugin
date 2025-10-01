@@ -17,7 +17,7 @@ class UPSPR_Frontend {
     /**
      * Get instance
      */
-    public static function get_instance() {
+    public static function upspr_get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -28,26 +28,26 @@ class UPSPR_Frontend {
      * Constructor
      */
     private function __construct() {
-        $this->init();
+        $this->upspr_init();
     }
 
     /**
      * Initialize
      */
-    private function init() {
+    private function upspr_init() {
         // Enqueue frontend scripts and styles
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'upspr_enqueue_frontend_scripts' ) );
 
         // Initialize AJAX tracking handlers immediately
         if ( class_exists( 'UPSPR_Performance_Tracker' ) ) {
-            UPSPR_Performance_Tracker::init_ajax_tracking();
+            UPSPR_Performance_Tracker::upspr_init_ajax_tracking();
         }
     }
 
     /**
      * Enqueue frontend scripts
      */
-    public function enqueue_frontend_scripts() {
+    public function upspr_enqueue_frontend_scripts() {
         // Only load on WooCommerce pages
         if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() ) {
             return;

@@ -28,22 +28,22 @@ class UPSPR_Related_Products {
      *
      * @return array|false Array of recommended products or false on failure
      */
-    public function process() {
+    public function upspr_process() {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
 
-        $current_product_id = $this->get_current_product_id();
+        $current_product_id = $this->upspr_get_current_product_id();
         if ( ! $current_product_id ) {
             return false;
         }
 
-        $recommendations = $this->get_related_recommendations( $current_product_id );
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $recommendations = $this->upspr_get_related_recommendations( $current_product_id );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Display the campaign using the location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'related-products' );
+            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'related-products' );
         }
 
         return $formatted_recommendations;
@@ -52,7 +52,7 @@ class UPSPR_Related_Products {
     /**
      * Get current product ID
      */
-    private function get_current_product_id() {
+    private function upspr_get_current_product_id() {
         global $product, $post;
         
         // Method 1: Try global $product if it's a valid WC_Product object
@@ -95,7 +95,7 @@ class UPSPR_Related_Products {
     /**
      * Get related product recommendations
      */
-    private function get_related_recommendations( $product_id ) {
+    private function upspr_get_related_recommendations( $product_id ) {
         $recommendations = array();
 
         return  $recommendations;
@@ -104,7 +104,7 @@ class UPSPR_Related_Products {
     /**
      * Format recommendations
      */
-    private function format_recommendations( $product_ids ) {
+    private function upspr_format_recommendations( $product_ids ) {
         $formatted = array();
         if ( empty( $product_ids ) ) {
             return $formatted;
@@ -132,24 +132,24 @@ class UPSPR_Related_Products {
      *
      * @return string HTML output or empty string if no recommendations
      */
-    public function render() {
+    public function upspr_render() {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
 
-        $current_product_id = $this->get_current_product_id();
+        $current_product_id = $this->upspr_get_current_product_id();
         if ( ! $current_product_id ) {
             return '';
         }
 
-        $recommendations = $this->get_related_recommendations( $current_product_id );
+        $recommendations = $this->upspr_get_related_recommendations( $current_product_id );
         if ( empty( $recommendations ) ) {
             return '';
         }
 
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
         if ( ! empty( $formatted_recommendations ) ) {
-            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'related-products' );
+            return UPSPR_Location_Display::upspr_get_campaign_html( $this->campaign_data, $formatted_recommendations, 'related-products' );
         }
 
         return '';

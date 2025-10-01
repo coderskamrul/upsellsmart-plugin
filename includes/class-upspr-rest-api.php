@@ -27,7 +27,7 @@ class UPSPR_REST_API {
     /**
      * Get instance
      */
-    public static function get_instance() {
+    public static function upspr_get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -38,19 +38,19 @@ class UPSPR_REST_API {
      * Constructor
      */
     private function __construct() {
-        $this->database = UPSPR_Database::get_instance();
-        add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+        $this->database = UPSPR_Database::upspr_get_instance();
+        add_action( 'rest_api_init', array( $this, 'upspr_register_routes' ) );
     }
 
     /**
      * Register REST API routes
      */
-    public function register_routes() {
+    public function upspr_register_routes() {
         // Get all campaigns
         register_rest_route( $this->namespace, '/campaigns', array(
             'methods' => 'GET',
-            'callback' => array( $this, 'get_campaigns' ),
-            'permission_callback' => array( $this, 'check_admin_permissions' ),
+            'callback' => array( $this, 'upspr_get_campaigns' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
             'args' => array(
                 'status' => array(
                     'type' => 'string',
@@ -78,8 +78,8 @@ class UPSPR_REST_API {
         // Create campaign
         register_rest_route( $this->namespace, '/campaigns', array(
             'methods' => 'POST',
-            'callback' => array( $this, 'create_campaign' ),
-            'permission_callback' => array( $this, 'check_admin_permissions' ),
+            'callback' => array( $this, 'upspr_create_campaign' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
             'args' => array(
                 'name' => array(
                     'required' => true,
@@ -143,8 +143,8 @@ class UPSPR_REST_API {
         // Get single campaign
         register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)', array(
             'methods' => 'GET',
-            'callback' => array( $this, 'get_campaign' ),
-            'permission_callback' => array( $this, 'check_admin_permissions' ),
+            'callback' => array( $this, 'upspr_get_campaign' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
             'args' => array(
                 'id' => array(
                     'required' => true,
@@ -157,8 +157,8 @@ class UPSPR_REST_API {
         // Update campaign
         register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)', array(
             'methods' => 'PUT',
-            'callback' => array( $this, 'update_campaign' ),
-            'permission_callback' => array( $this, 'check_admin_permissions' ),
+            'callback' => array( $this, 'upspr_update_campaign' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
             'args' => array(
                 'id' => array(
                     'required' => true,
@@ -221,8 +221,8 @@ class UPSPR_REST_API {
         // Delete campaign
         register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)', array(
             'methods' => 'DELETE',
-            'callback' => array( $this, 'delete_campaign' ),
-            'permission_callback' => array( $this, 'check_admin_permissions' ),
+            'callback' => array( $this, 'upspr_delete_campaign' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
             'args' => array(
                 'id' => array(
                     'required' => true,
@@ -236,14 +236,14 @@ class UPSPR_REST_API {
     /**
      * Check admin permissions
      */
-    public function check_admin_permissions() {
+    public function upspr_check_admin_permissions() {
         return current_user_can( 'manage_woocommerce' );
     }
 
     /**
      * Get campaigns
      */
-    public function get_campaigns( $request ) {
+    public function upspr_get_campaigns( $request ) {
         $page = $request->get_param( 'page' );
         $per_page = $request->get_param( 'per_page' );
         $status = $request->get_param( 'status' );
@@ -264,8 +264,8 @@ class UPSPR_REST_API {
             $args['type'] = $type;
         }
 
-        $campaigns = $this->database->get_campaigns( $args );
-        $total = $this->database->get_campaigns_count( $args );
+        $campaigns = $this->database->upspr_get_campaigns( $args );
+        $total = $this->database->upspr_get_campaigns_count( $args );
 
         $response = rest_ensure_response( $campaigns );
         $response->header( 'X-WP-Total', $total );
@@ -277,7 +277,7 @@ class UPSPR_REST_API {
     /**
      * Create campaign
      */
-    public function create_campaign( $request ) {
+    public function upspr_create_campaign( $request ) {
         $data = array(
             'name' => $request->get_param( 'name' ),
             'description' => $request->get_param( 'description' ),
@@ -308,9 +308,9 @@ class UPSPR_REST_API {
     /**
      * Get single campaign
      */
-    public function get_campaign( $request ) {
+    public function upspr_get_campaign( $request ) {
         $id = $request->get_param( 'id' );
-        $campaign = $this->database->get_campaign( $id );
+        $campaign = $this->database->upspr_get_campaign( $id );
 
         if ( ! $campaign ) {
             return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
@@ -322,11 +322,11 @@ class UPSPR_REST_API {
     /**
      * Update campaign
      */
-    public function update_campaign( $request ) {
+    public function upspr_update_campaign( $request ) {
         $id = $request->get_param( 'id' );
 
         // Check if campaign exists
-        $existing_campaign = $this->database->get_campaign( $id );
+        $existing_campaign = $this->database->upspr_get_campaign( $id );
         if ( ! $existing_campaign ) {
             return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
         }
@@ -341,13 +341,13 @@ class UPSPR_REST_API {
             }
         }
 
-        $success = $this->database->update_campaign( $id, $data );
+        $success = $this->database->upspr_update_campaign( $id, $data );
 
         if ( ! $success ) {
             return new WP_Error( 'update_failed', 'Failed to update campaign', array( 'status' => 500 ) );
         }
 
-        $campaign = $this->database->get_campaign( $id );
+        $campaign = $this->database->upspr_get_campaign( $id );
 
         return rest_ensure_response( $campaign );
     }
@@ -355,16 +355,16 @@ class UPSPR_REST_API {
     /**
      * Delete campaign
      */
-    public function delete_campaign( $request ) {
+    public function upspr_delete_campaign( $request ) {
         $id = $request->get_param( 'id' );
 
         // Check if campaign exists
-        $existing_campaign = $this->database->get_campaign( $id );
+        $existing_campaign = $this->database->upspr_get_campaign( $id );
         if ( ! $existing_campaign ) {
             return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
         }
 
-        $success = $this->database->delete_campaign( $id );
+        $success = $this->database->upspr_delete_campaign( $id );
 
         if ( ! $success ) {
             return new WP_Error( 'delete_failed', 'Failed to delete campaign', array( 'status' => 500 ) );

@@ -16,7 +16,7 @@ class UPSPR_Amplifier {
      * @param array $amplifier_config Amplifier configuration
      * @return array Product IDs with boost scores
      */
-    public static function apply_sales_performance_boost( $product_ids, $amplifier_config ) {
+    public static function upspr_apply_sales_performance_boost( $product_ids, $amplifier_config ) {
         if ( empty( $product_ids ) || ! isset( $amplifier_config['salesPerformanceBoost'] ) || ! $amplifier_config['salesPerformanceBoost'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -24,11 +24,11 @@ class UPSPR_Amplifier {
         $boost_factor = isset( $amplifier_config['salesBoostFactor'] ) ? $amplifier_config['salesBoostFactor'] : 'medium';
         $time_period = isset( $amplifier_config['salesTimePeriod'] ) ? $amplifier_config['salesTimePeriod'] : 'last-30-days';
 
-        $days = self::get_days_from_period( $time_period );
-        $multiplier = self::get_boost_multiplier( $boost_factor );
+        $days = self::upspr_get_days_from_period( $time_period );
+        $multiplier = self::upspr_get_boost_multiplier( $boost_factor );
 
         // Get sales data for products
-        $sales_data = self::get_product_sales_data( $product_ids, $days );
+        $sales_data = self::upspr_get_product_sales_data( $product_ids, $days );
 
         $scores = array();
         $max_sales = max( array_values( $sales_data ) );
@@ -54,7 +54,7 @@ class UPSPR_Amplifier {
      * @param array $amplifier_config Amplifier configuration
      * @return array Product IDs with boost scores
      */
-    public static function apply_inventory_level_boost( $product_ids, $amplifier_config ) {
+    public static function upspr_apply_inventory_level_boost( $product_ids, $amplifier_config ) {
         if ( empty( $product_ids ) || ! isset( $amplifier_config['inventoryLevelBoost'] ) || ! $amplifier_config['inventoryLevelBoost'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -111,7 +111,7 @@ class UPSPR_Amplifier {
      * @param array $amplifier_config Amplifier configuration
      * @return array Product IDs with boost scores
      */
-    public static function apply_seasonal_trending_boost( $product_ids, $amplifier_config ) {
+    public static function upspr_apply_seasonal_trending_boost( $product_ids, $amplifier_config ) {
         if ( empty( $product_ids ) || ! isset( $amplifier_config['seasonalTrendingBoost'] ) || ! $amplifier_config['seasonalTrendingBoost'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -124,7 +124,7 @@ class UPSPR_Amplifier {
         }
 
         // Get sales data for the trending duration to identify actually trending products
-        $trending_sales_data = self::get_product_sales_data( $product_ids, $trending_duration );
+        $trending_sales_data = self::upspr_get_product_sales_data( $product_ids, $trending_duration );
         $max_trending_sales = max( array_values( $trending_sales_data ) );
 
         // Debug log for trending sales data
@@ -198,7 +198,7 @@ class UPSPR_Amplifier {
      * @param float $margin_threshold Minimum margin percentage to boost
      * @return array Product IDs with boost scores
      */
-    public static function apply_margin_boost( $product_ids, $margin_threshold = 30.0 ) {
+    public static function upspr_apply_margin_boost( $product_ids, $margin_threshold = 30.0 ) {
         if ( empty( $product_ids ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -241,7 +241,7 @@ class UPSPR_Amplifier {
      * @param float $min_rating Minimum rating to boost
      * @return array Product IDs with boost scores
      */
-    public static function apply_rating_boost( $product_ids, $min_rating = 4.0 ) {
+    public static function upspr_apply_rating_boost( $product_ids, $min_rating = 4.0 ) {
         if ( empty( $product_ids ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -281,7 +281,7 @@ class UPSPR_Amplifier {
      * @param int $new_product_days Number of days to consider a product "new"
      * @return array Product IDs with boost scores
      */
-    public static function apply_new_product_boost( $product_ids, $new_product_days = 30 ) {
+    public static function upspr_apply_new_product_boost( $product_ids, $new_product_days = 30 ) {
         if ( empty( $product_ids ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -314,7 +314,7 @@ class UPSPR_Amplifier {
      * @param int $days Number of days to look back
      * @return array Product ID => sales count mapping
      */
-    private static function get_product_sales_data( $product_ids, $days ) {
+    private static function upspr_get_product_sales_data( $product_ids, $days ) {
         global $wpdb;
 
         if ( empty( $product_ids ) ) {
@@ -386,7 +386,7 @@ class UPSPR_Amplifier {
      * @param string $boost_factor Boost factor (low, medium, high)
      * @return float Boost multiplier
      */
-    private static function get_boost_multiplier( $boost_factor ) {
+    private static function upspr_get_boost_multiplier( $boost_factor ) {
         switch ( $boost_factor ) {
             case 'low':
                 return 0.3;
@@ -405,7 +405,7 @@ class UPSPR_Amplifier {
      * @param string $period Period string
      * @return int Number of days
      */
-    private static function get_days_from_period( $period ) {
+    private static function upspr_get_days_from_period( $period ) {
         switch ( $period ) {
             case 'last-7-days':
                 return 7;
@@ -428,7 +428,7 @@ class UPSPR_Amplifier {
      * @param array $score_arrays Array of score arrays to combine
      * @return array Combined scores
      */
-    public static function combine_amplifier_scores( $score_arrays ) {
+    public static function upspr_combine_amplifier_scores( $score_arrays ) {
         if ( empty( $score_arrays ) ) {
             return array();
         }

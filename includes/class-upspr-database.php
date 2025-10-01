@@ -22,7 +22,7 @@ class UPSPR_Database {
     /**
      * Get instance
      */
-    public static function get_instance() {
+    public static function upspr_get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -35,13 +35,13 @@ class UPSPR_Database {
     private function __construct() {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'upspr_recommendation_campaigns';
-        $this->create_tables();
+        $this->upspr_create_tables();
     }
 
     /**
      * Create database tables
      */
-    public function create_tables() {
+    public function upspr_create_tables() {
         global $wpdb;
 
         $charset_collate = $wpdb->get_charset_collate();
@@ -77,14 +77,14 @@ class UPSPR_Database {
     /**
      * Get table name
      */
-    public function get_table_name() {
+    public function upspr_get_table_name() {
         return $this->table_name;
     }
 
     /**
      * Create recommendation campaign
      */
-    public function create_campaign( $data ) {
+    public function upspr_create_campaign( $data ) {
         global $wpdb;
 
         // Handle both old form_data format and new organized format
@@ -162,7 +162,7 @@ class UPSPR_Database {
     /**
      * Get all campaigns
      */
-    public function get_campaigns( $args = array() ) {
+    public function upspr_get_campaigns( $args = array() ) {
         global $wpdb;
 
         $defaults = array(
@@ -242,7 +242,7 @@ class UPSPR_Database {
     /**
      * Get single campaign
      */
-    public function get_campaign( $id ) {
+    public function upspr_get_campaign( $id ) {
         global $wpdb;
 
         $sql = $wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE id = %d", $id );
@@ -284,7 +284,7 @@ class UPSPR_Database {
     /**
      * Update campaign
      */
-    public function update_campaign( $id, $data ) {
+    public function upspr_update_campaign( $id, $data ) {
         global $wpdb;
 
         // Handle new organized format
@@ -372,7 +372,7 @@ class UPSPR_Database {
     /**
      * Delete campaign
      */
-    public function delete_campaign( $id ) {
+    public function upspr_delete_campaign( $id ) {
         global $wpdb;
 
         $result = $wpdb->delete(
@@ -387,7 +387,7 @@ class UPSPR_Database {
     /**
      * Get campaigns count
      */
-    public function get_campaigns_count( $args = array() ) {
+    public function upspr_get_campaigns_count( $args = array() ) {
         global $wpdb;
 
         $where_clauses = array();

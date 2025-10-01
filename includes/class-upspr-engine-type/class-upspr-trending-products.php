@@ -18,24 +18,23 @@ class UPSPR_Trending_Products {
      * Constructor
      */
     public function __construct( $campaign_data = array() ) {
-        echo 'kxx<pre>'; print_r('trending-products'); echo '</pre>';
         $this->campaign_data = $campaign_data;
     }
 
     /**
      * Process trending products campaign
      */
-    public function process() {
+    public function upspr_process() {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
 
-        $recommendations = $this->get_trending_products();
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $recommendations = $this->upspr_get_trending_products();
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Display the campaign using the location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'trending-products' );
+            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'trending-products' );
         }
 
         return $formatted_recommendations;
@@ -44,7 +43,7 @@ class UPSPR_Trending_Products {
     /**
      * Get trending products
      */
-    private function get_trending_products() {
+    private function upspr_get_trending_products() {
         $recommendations = array();
 
         return $recommendations;
@@ -53,7 +52,7 @@ class UPSPR_Trending_Products {
     /**
      * Format recommendations
      */
-    private function format_recommendations( $product_ids ) {
+    private function upspr_format_recommendations( $product_ids ) {
         $formatted = array();
         if ( empty( $product_ids ) ) {
             return $formatted;
@@ -81,19 +80,19 @@ class UPSPR_Trending_Products {
      *
      * @return string HTML output or empty string if no recommendations
      */
-    public function render() {
+    public function upspr_render() {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
 
-        $trending_products = $this->get_trending_products();
+        $trending_products = $this->upspr_get_trending_products();
         if ( empty( $trending_products ) ) {
             return '';
         }
 
-        $formatted_recommendations = $this->format_recommendations( $trending_products );
+        $formatted_recommendations = $this->upspr_format_recommendations( $trending_products );
         if ( ! empty( $formatted_recommendations ) ) {
-            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'trending-products' );
+            return UPSPR_Location_Display::upspr_get_campaign_html( $this->campaign_data, $formatted_recommendations, 'trending-products' );
         }
 
         return '';

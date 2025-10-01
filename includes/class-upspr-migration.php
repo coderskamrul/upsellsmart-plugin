@@ -12,12 +12,12 @@ class UPSPR_Migration {
     /**
      * Run database migrations
      */
-    public static function run_migrations() {
+    public static function upspr_run_migrations() {
         $current_version = get_option( 'upspr_db_version', '1.0.0' );
         $target_version = '2.1.0'; // Incremented to force migration
 
         if ( version_compare( $current_version, $target_version, '<' ) ) {
-            self::migrate_to_v2();
+            self::upspr_migrate_to_v2();
             update_option( 'upspr_db_version', $target_version );
         }
     }
@@ -25,7 +25,7 @@ class UPSPR_Migration {
     /**
      * Migrate to version 2.0 - Add organized data columns
      */
-    private static function migrate_to_v2() {
+    private static function upspr_migrate_to_v2() {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'upspr_recommendation_campaigns';

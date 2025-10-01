@@ -17,7 +17,7 @@ class UPSPR_Recommendations {
     /**
      * Get instance
      */
-    public static function get_instance() {
+    public static function upspr_get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -29,47 +29,47 @@ class UPSPR_Recommendations {
      */
     private function __construct() {
         // Initialize recommendations engine
-        $this->init();
+        $this->upspr_init();
     }
 
     /**
      * Get database instance
      */
-    private function get_database() {
-        return UPSPR_Database::get_instance();
+    private function upspr_get_database() {
+        return UPSPR_Database::upspr_get_instance();
     }
 
     /**
      * Initialize
      */
-    private function init() {
+    private function upspr_init() {
         // Load all campaign engine types
         require_once plugin_dir_path( __FILE__ ) . 'class-upspr-engine-type/index.php';
 
         // Add hooks for recommendation display
-       // add_action( 'woocommerce_single_product_summary', array( $this, 'display_product_recommendations' ), 25 );
-        add_action( 'wp', array( $this, 'display_product_recommendations' ), 20 );
-        //$this->display_product_recommendations();
+       // add_action( 'woocommerce_single_product_summary', array( $this, 'upspr_display_product_recommendations' ), 25 );
+        add_action( 'wp', array( $this, 'upspr_display_product_recommendations' ), 20 );
+        //$this->upspr_display_product_recommendations();
     }
 
     /**
      * Display product page recommendations
      */
-    public function display_product_recommendations() {
+    public function upspr_display_product_recommendations() {
         // Get active campaigns for product page
-        $campaigns = $this->get_campaigns_for_location( '' );
+        $campaigns = $this->upspr_get_campaigns_for_location( '' );
 
         if ( empty( $campaigns ) ) {
             return;
         }
        //echo '<pre>'; print_r($campaigns[0]['performance']); echo '</pre>';
-        echo UPSPR_Campaign_Factory::render_campaigns( $campaigns );
+        echo UPSPR_Campaign_Factory::upspr_render_campaigns( $campaigns );
     }
 
     /**
      * Get recommendations for a product
      */
-    public function get_product_recommendations( $product_id, $campaign_type = 'cross-sell', $limit = 4 ) {
+    public function upspr_get_product_recommendations( $product_id, $campaign_type = 'cross-sell', $limit = 4 ) {
         // TODO: Implement recommendation logic
         // This will use the campaign rules to generate recommendations
         return array();
@@ -82,9 +82,9 @@ class UPSPR_Recommendations {
      * @param string $type Optional. Filter by campaign type (e.g., 'cross-sell', 'upsell', 'related')
      * @return array Array of active campaigns
      */
-    public function get_active_campaigns( $location = '', $type = '' ) {
-        $database = $this->get_database();
-        
+    public function upspr_get_active_campaigns( $location = '', $type = '' ) {
+        $database = $this->upspr_get_database();
+
         $args = array(
             'status' => 'active',
             'orderby' => 'priority',
@@ -102,7 +102,7 @@ class UPSPR_Recommendations {
             $args['type'] = $type;
         }
 
-        return $database->get_campaigns( $args );
+        return $database->upspr_get_campaigns( $args );
     }
 
     /**
@@ -111,8 +111,8 @@ class UPSPR_Recommendations {
      * @param string $location The location to get campaigns for
      * @return array Array of active campaigns for the location
      */
-    public function get_campaigns_for_location( $location ) {
-        return $this->get_active_campaigns( $location );
+    public function upspr_get_campaigns_for_location( $location ) {
+        return $this->upspr_get_active_campaigns( $location );
     }
 
     /**
@@ -121,8 +121,8 @@ class UPSPR_Recommendations {
      * @param string $type The campaign type to get campaigns for
      * @return array Array of active campaigns of the specified type
      */
-    public function get_campaigns_by_type( $type ) {
-        return $this->get_active_campaigns( '', $type );
+    public function upspr_get_campaigns_by_type( $type ) {
+        return $this->upspr_get_active_campaigns( '', $type );
     }
 
     /**
@@ -130,9 +130,9 @@ class UPSPR_Recommendations {
      *
      * @return array Campaign statistics
      */
-    public function get_campaign_statistics() {
-        $all_campaigns = $this->get_active_campaigns();
-        return UPSPR_Campaign_Factory::get_campaign_statistics( $all_campaigns );
+    public function upspr_get_campaign_statistics() {
+        $all_campaigns = $this->upspr_get_active_campaigns();
+        return UPSPR_Campaign_Factory::upspr_get_campaign_statistics( $all_campaigns );
     }
 
     /**
@@ -141,11 +141,11 @@ class UPSPR_Recommendations {
      * @param array $campaign_data Campaign data
      * @return array|false Processed campaign data or false on failure
      */
-    public function process_campaign( $campaign_data ) {
-        $campaign_instance = UPSPR_Campaign_Factory::create_campaign( $campaign_data );
+    public function upspr_process_campaign( $campaign_data ) {
+        $campaign_instance = UPSPR_Campaign_Factory::upspr_create_campaign( $campaign_data );
 
         if ( $campaign_instance ) {
-            return $campaign_instance->process();
+            return $campaign_instance->upspr_process();
         }
 
         return false;
@@ -157,11 +157,11 @@ class UPSPR_Recommendations {
      * @param array $campaign_data Campaign data
      * @return string HTML output
      */
-    public function render_campaign( $campaign_data ) {
-        $campaign_instance = UPSPR_Campaign_Factory::create_campaign( $campaign_data );
+    public function upspr_render_campaign( $campaign_data ) {
+        $campaign_instance = UPSPR_Campaign_Factory::upspr_create_campaign( $campaign_data );
 
         if ( $campaign_instance ) {
-            return $campaign_instance->render();
+            return $campaign_instance->upspr_render();
         }
 
         return '';

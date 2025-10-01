@@ -28,22 +28,22 @@ class UPSPR_Campaign_Factory {
      * @param array $campaign_data Campaign data including type
      * @return object|false Campaign instance or false on failure
      */
-    public static function create_campaign( $campaign_data ) {
+    public static function upspr_create_campaign( $campaign_data ) {
         if ( empty( $campaign_data['type'] ) || $campaign_data['status'] !== 'active' ) {
             return false;
         }
 
         $campaign_type = $campaign_data['type'];
-        
+
         if ( ! isset( self::$campaign_types[ $campaign_type ] ) ) {
             return false;
         }
 
         $class_name = self::$campaign_types[ $campaign_type ];
-        
+
         // Load the class file if not already loaded
-        self::load_campaign_class( $campaign_type );
-        
+        self::upspr_load_campaign_class( $campaign_type );
+
         if ( ! class_exists( $class_name ) ) {
             return false;
         }
@@ -56,7 +56,7 @@ class UPSPR_Campaign_Factory {
      *
      * @param string $campaign_type Campaign type
      */
-    private static function load_campaign_class( $campaign_type ) {
+    private static function upspr_load_campaign_class( $campaign_type ) {
 
         $file_map = array(
             'cross-sell' => 'class-upspr-cross-sell.php',
@@ -70,7 +70,7 @@ class UPSPR_Campaign_Factory {
 
         if ( isset( $file_map[ $campaign_type ] ) ) {
             $file_path = plugin_dir_path( __FILE__ ) . $file_map[ $campaign_type ];
-            
+
             if ( file_exists( $file_path ) ) {
                 require_once $file_path;
             }
@@ -82,7 +82,7 @@ class UPSPR_Campaign_Factory {
      *
      * @return array Available campaign types
      */
-    public static function get_available_types() {
+    public static function upspr_get_available_types() {
         return array_keys( self::$campaign_types );
     }
 
@@ -92,7 +92,7 @@ class UPSPR_Campaign_Factory {
      * @param string $campaign_type Campaign type
      * @return string|false Class name or false if not found
      */
-    public static function get_campaign_class( $campaign_type ) {
+    public static function upspr_get_campaign_class( $campaign_type ) {
         return isset( self::$campaign_types[ $campaign_type ] ) ? self::$campaign_types[ $campaign_type ] : false;
     }
 
@@ -102,7 +102,7 @@ class UPSPR_Campaign_Factory {
      * @param string $campaign_type Campaign type to check
      * @return bool True if valid, false otherwise
      */
-    public static function is_valid_type( $campaign_type ) {
+    public static function upspr_is_valid_type( $campaign_type ) {
         return isset( self::$campaign_types[ $campaign_type ] );
     }
 
@@ -111,7 +111,7 @@ class UPSPR_Campaign_Factory {
      *
      * @return array Campaign type display names
      */
-    public static function get_type_labels() {
+    public static function upspr_get_type_labels() {
         return array(
             'cross-sell' => __( 'Cross-sell', 'upsellsmart' ),
             'upsell' => __( 'Upsell', 'upsellsmart' ),
@@ -128,7 +128,7 @@ class UPSPR_Campaign_Factory {
      *
      * @return array Campaign type descriptions
      */
-    public static function get_type_descriptions() {
+    public static function upspr_get_type_descriptions() {
         return array(
             'cross-sell' => __( 'Show complementary products that work well with the current product', 'upsellsmart' ),
             'upsell' => __( 'Suggest higher-value alternatives or premium versions of the current product', 'upsellsmart' ),
@@ -146,20 +146,20 @@ class UPSPR_Campaign_Factory {
      * @param array $campaigns Array of campaign data
      * @return array Array of processed campaign results
      */
-    public static function process_campaigns( $campaigns ) {
+    public static function upspr_process_campaigns( $campaigns ) {
         $results = array();
 
         foreach ( $campaigns as $campaign ) {
-            $campaign_instance = self::create_campaign( $campaign );
-            
+            $campaign_instance = self::upspr_create_campaign( $campaign );
+
             if ( $campaign_instance ) {
-                $processed_data = $campaign_instance->process();
-                
+                $processed_data = $campaign_instance->upspr_process();
+
                 if ( $processed_data ) {
                     $results[] = array(
                         'campaign' => $campaign,
                         'recommendations' => $processed_data,
-                        //'html' => $campaign_instance->render(),
+                        //'html' => $campaign_instance->upspr_render(),
                     );
                 }
             }
@@ -174,9 +174,9 @@ class UPSPR_Campaign_Factory {
      * @param array $campaigns Array of campaign data
      * @return string Combined HTML output
      */
-    public static function render_campaigns( $campaigns ) {
+    public static function upspr_render_campaigns( $campaigns ) {
         $html_output = '';
-        $processed_campaigns = self::process_campaigns( $campaigns );
+        $processed_campaigns = self::upspr_process_campaigns( $campaigns );
 
         foreach ( $processed_campaigns as $campaign_result ) {
             $html_output .= $campaign_result['html'];
@@ -191,7 +191,7 @@ class UPSPR_Campaign_Factory {
      * @param array $campaigns Array of campaign data
      * @return array Campaign statistics
      */
-    public static function get_campaign_statistics( $campaigns ) {
+    public static function upspr_get_campaign_statistics( $campaigns ) {
         $stats = array(
             'total_campaigns' => count( $campaigns ),
             'by_type' => array(),

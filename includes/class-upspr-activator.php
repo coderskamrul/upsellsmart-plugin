@@ -20,7 +20,7 @@ class UPSPR_Activator {
         UPSPR_Database::get_instance();
 
         // Set default options
-        self::set_default_options();
+        self::upspr_set_default_options();
 
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -29,7 +29,7 @@ class UPSPR_Activator {
     /**
      * Set default options
      */
-    private static function set_default_options() {
+    private static function upspr_set_default_options() {
         $default_options = array(
             'upspr_version' => UPSPR_VERSION,
             'upspr_db_version' => '1.0.0',

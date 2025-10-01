@@ -110,17 +110,17 @@ class UPSPR_Product_Recommendations {
 
         // Initialize classes
         try {
-            UPSPR_Database::get_instance();
-            UPSPR_Migration::run_migrations(); // Run database migrations
-            UPSPR_Admin::get_instance();
-            UPSPR_REST_API::get_instance();
-            UPSPR_Recommendations::get_instance();
-            UPSPR_Frontend::get_instance();
-            UPSPR_Settings::get_instance();
+            UPSPR_Database::upspr_get_instance();
+            UPSPR_Migration::upspr_run_migrations(); // Run database migrations
+            UPSPR_Admin::upspr_get_instance();
+            UPSPR_REST_API::upspr_get_instance();
+            UPSPR_Recommendations::upspr_get_instance();
+            UPSPR_Frontend::upspr_get_instance();
+            UPSPR_Settings::upspr_get_instance();
 
             // Initialize cross-sell integration for conversion tracking
             if ( class_exists( 'UPSPR_Cross_Sell_Integration' ) ) {
-                UPSPR_Cross_Sell_Integration::init();
+                UPSPR_Cross_Sell_Integration::upspr_init();
             }
         } catch ( Exception $e ) {
             error_log( 'UpSellSmart Plugin Error: ' . $e->getMessage() );

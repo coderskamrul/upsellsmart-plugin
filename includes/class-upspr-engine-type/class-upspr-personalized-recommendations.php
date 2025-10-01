@@ -24,18 +24,18 @@ class UPSPR_Personalized_Recommendations {
     /**
      * Process personalized recommendations campaign
      */
-    public function process() {
+    public function upspr_process() {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
 
         $user_id = get_current_user_id();
-        $recommendations = $this->get_personalized_recommendations( $user_id );
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $recommendations = $this->upspr_get_personalized_recommendations( $user_id );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Display the campaign using the location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
+            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
         }
 
         return $formatted_recommendations;
@@ -44,7 +44,7 @@ class UPSPR_Personalized_Recommendations {
     /**
      * Get personalized recommendations
      */
-    private function get_personalized_recommendations( $user_id ) {
+    private function upspr_get_personalized_recommendations( $user_id ) {
        
         return $recommendations;
     }
@@ -52,7 +52,7 @@ class UPSPR_Personalized_Recommendations {
     /**
      * Format recommendations
      */
-    private function format_recommendations( $product_ids ) {
+    private function upspr_format_recommendations( $product_ids ) {
         $formatted = array();
         if ( empty( $product_ids ) ) {
             return $formatted;
@@ -79,20 +79,20 @@ class UPSPR_Personalized_Recommendations {
      *
      * @return string HTML output or empty string if no recommendations
      */
-    public function render() {
+    public function upspr_render() {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
 
         $user_id = get_current_user_id();
-        $recommendations = $this->get_personalized_recommendations( $user_id );
+        $recommendations = $this->upspr_get_personalized_recommendations( $user_id );
         if ( empty( $recommendations ) ) {
             return '';
         }
 
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
         if ( ! empty( $formatted_recommendations ) ) {
-            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
+            return UPSPR_Location_Display::upspr_get_campaign_html( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
         }
 
         return '';

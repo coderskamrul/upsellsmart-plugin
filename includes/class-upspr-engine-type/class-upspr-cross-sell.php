@@ -35,32 +35,32 @@ class UPSPR_Cross_Sell {
      *
      * @return array|false Array of recommended products or false on failure
      */
-    public function process() {
+    public function upspr_process() {
         if ( empty( $this->campaign_data ) ) {
             return false;
         }
-        
+
         // Check visibility rules first
         $visibility_config = isset( $this->campaign_data['visibility'] ) ? $this->campaign_data['visibility'] : array();
-        if ( ! UPSPR_Visibility_Checker::should_display_campaign( $visibility_config ) ) {
+        if ( ! UPSPR_Visibility_Checker::upspr_should_display_campaign( $visibility_config ) ) {
             return false; // Campaign should not be displayed based on visibility rules
         }
 
         // Get cross-sell recommendations based on campaign rules
-        $recommendations = $this->get_cross_sell_recommendations();
+        $recommendations = $this->upspr_get_cross_sell_recommendations();
         if ( empty( $recommendations ) ) {
             return false;
         }
 
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Display the campaign using the location display system
         if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::display_campaign( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
+            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
 
             // Track impression with campaign-specific validation
             $product_ids = array_column( $formatted_recommendations, 'id' );
-            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
+            UPSPR_Performance_Tracker::upspr_track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
         }
 
         return $formatted_recommendations;
@@ -71,31 +71,31 @@ class UPSPR_Cross_Sell {
      *
      * @return string HTML output or empty string if no recommendations
      */
-    public function render() {
+    public function upspr_render() {
         if ( empty( $this->campaign_data ) ) {
             return '';
         }
         // Check visibility rules first
         $visibility_config = isset( $this->campaign_data['visibility'] ) ? $this->campaign_data['visibility'] : array();
-        if ( ! UPSPR_Visibility_Checker::should_display_campaign( $visibility_config ) ) {
+        if ( ! UPSPR_Visibility_Checker::upspr_should_display_campaign( $visibility_config ) ) {
             return '';
         }
 
         // Get cross-sell recommendations based on campaign rules
-        $recommendations = $this->get_cross_sell_recommendations();
+        $recommendations = $this->upspr_get_cross_sell_recommendations();
         if ( empty( $recommendations ) ) {
             return '';
         }
 
-        $formatted_recommendations = $this->format_recommendations( $recommendations );
+        $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
         // Get HTML from location display system
         if ( ! empty( $formatted_recommendations ) ) {
             // Track impression with campaign-specific validation
             $product_ids = array_column( $formatted_recommendations, 'id' );
-            UPSPR_Performance_Tracker::track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
+            UPSPR_Performance_Tracker::upspr_track_impression( $this->campaign_data['id'], $product_ids, $this->campaign_data );
 
-            return UPSPR_Location_Display::get_campaign_html( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
+            return UPSPR_Location_Display::upspr_get_campaign_html( $this->campaign_data, $formatted_recommendations, 'cross-sell' );
         }
 
         return '';
@@ -106,12 +106,12 @@ class UPSPR_Cross_Sell {
      *
      * @return int|array|false Product ID, array of cart product IDs, or false if not found
      */
-    private function get_current_product_id() {
+    private function upspr_get_current_product_id() {
         global $product, $post;
-        
+
         // Method 1: Check if we're on cart or checkout page - get cart product IDs
         if ( is_cart() || is_checkout() ) {
-            return $this->get_cart_product_ids();
+            return $this->upspr_get_cart_product_ids();
         }
         
         // Method 2: Try global $product if it's a valid WC_Product object (product page)
@@ -156,7 +156,7 @@ class UPSPR_Cross_Sell {
      *
      * @return array Array of product IDs in cart
      */
-    private function get_cart_product_ids() {
+    private function upspr_get_cart_product_ids() {
         if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
             return array();
         }
@@ -186,7 +186,7 @@ class UPSPR_Cross_Sell {
      * @param array $cart_product_ids Array of cart product IDs
      * @return array Array of cross-sell product IDs
      */
-    private function get_woocommerce_cross_sells( $cart_product_ids ) {
+    private function upspr_get_woocommerce_cross_sells( $cart_product_ids ) {
         $cross_sell_ids = array();
         
         foreach ( $cart_product_ids as $product_id ) {
@@ -219,7 +219,7 @@ class UPSPR_Cross_Sell {
      *
      * @return array Array of recommended product IDs with scores
      */
-    private function get_cross_sell_recommendations() {
+    private function upspr_get_cross_sell_recommendations() {
         $basic_info = isset( $this->campaign_data['basic_info'] ) ? $this->campaign_data['basic_info'] : array();
         $filters = isset( $this->campaign_data['filters'] ) ? $this->campaign_data['filters'] : array();
         $amplifiers = isset( $this->campaign_data['amplifiers'] ) ? $this->campaign_data['amplifiers'] : array();
@@ -228,7 +228,7 @@ class UPSPR_Cross_Sell {
         $products_count = isset( $basic_info['numberOfProducts'] ) ? intval( $basic_info['numberOfProducts'] ) : 4;
 
         // Get current product ID(s) for cross-sell context
-        $current_product_data = $this->get_current_product_id();
+        $current_product_data = $this->upspr_get_current_product_id();
         // If we can't get current product data, try fallback recommendations
         if ( ! $current_product_data || ( is_array( $current_product_data ) && empty( $current_product_data ) ) ) {
             // Log debug info for troubleshooting
@@ -245,11 +245,11 @@ class UPSPR_Cross_Sell {
             }
             
             // Try to get general recommendations instead of product-specific cross-sells
-            return $this->get_fallback_recommendations( $products_count );
+            return $this->upspr_get_fallback_recommendations( $products_count );
         }
 
         // Step 1: Get base product pool
-        $base_products = $this->get_base_product_pool( $current_product_data );
+        $base_products = $this->upspr_get_base_product_pool( $current_product_data );
         //echo 'ccb<pre>'; print_r($base_products); echo '</pre>';
 
         if ( empty( $base_products ) ) {
@@ -257,20 +257,20 @@ class UPSPR_Cross_Sell {
         }
 
         // Step 2: Apply filters
-       $filtered_products = $this->apply_filters( $base_products, $filters );
+       $filtered_products = $this->upspr_apply_filters( $base_products, $filters );
 
         if ( empty( $filtered_products ) ) {
             return array();
         }
 
         // Step 3: Apply amplifiers (boosting)
-        $amplified_scores = $this->apply_amplifiers( $filtered_products, $amplifiers );
+        $amplified_scores = $this->upspr_apply_amplifiers( $filtered_products, $amplifiers );
 
         // Step 4: Apply personalization
-        $personalized_scores = $this->apply_personalization( $filtered_products, $personalization );
+        $personalized_scores = $this->upspr_apply_personalization( $filtered_products, $personalization );
 
         // Step 5: Combine scores and sort
-        $final_scores = $this->combine_scores( $amplified_scores, $personalized_scores );
+        $final_scores = $this->upspr_combine_scores( $amplified_scores, $personalized_scores );
         // Step 6: Sort by score and limit results
         arsort( $final_scores );
         $recommended_products = array_slice( array_keys( $final_scores ), 0, $products_count, true );
@@ -284,7 +284,7 @@ class UPSPR_Cross_Sell {
      * @param int|array $current_product_data Current product ID or array of cart product IDs
      * @return array Array of product IDs
      */
-    private function get_base_product_pool( $current_product_data ) {
+    private function upspr_get_base_product_pool( $current_product_data ) {
         $base_products = array();
         $exclude_products = array();
         $all_categories = array();
@@ -353,7 +353,7 @@ class UPSPR_Cross_Sell {
             
             // For cart/checkout context, also get cross-sell and upsell meta from WooCommerce
             if ( is_array( $current_product_data ) ) {
-                $base_products = array_merge( $base_products, $this->get_woocommerce_cross_sells( $current_product_data ) );
+                $base_products = array_merge( $base_products, $this->upspr_get_woocommerce_cross_sells( $current_product_data ) );
                 $base_products = array_unique( $base_products );
             }
         }
@@ -392,7 +392,7 @@ class UPSPR_Cross_Sell {
      * @param array $filters Filter configuration
      * @return array Filtered product IDs
      */
-    private function apply_filters( $product_ids, $filters ) {
+    private function upspr_apply_filters( $product_ids, $filters ) {
         if ( empty( $product_ids ) || empty( $filters ) ) {
             return $product_ids;
         }
@@ -401,7 +401,7 @@ class UPSPR_Cross_Sell {
 
         // Include categories filter
         if ( isset( $filters['includeCategories'] ) && ! empty( $filters['includeCategories'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_categories(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_categories(
                 $filtered_products,
                 $filters['includeCategories'],
                 true
@@ -409,7 +409,7 @@ class UPSPR_Cross_Sell {
         }
         // Include tags filter
         if ( isset( $filters['includeTags'] ) && ! empty( $filters['includeTags'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_tags(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_tags(
                 $filtered_products,
                 $filters['includeTags'],
                 true
@@ -420,7 +420,7 @@ class UPSPR_Cross_Sell {
         if ( isset( $filters['priceRange'] ) && ! empty( $filters['priceRange'] )  && ( ( isset($filters['priceRange']['min']) && $filters['priceRange']['min'] !== '' )  || ( isset($filters['priceRange']['max']) && $filters['priceRange']['max'] !== '' )  ) ) {
             $min_price = isset( $filters['priceRange']['min'] ) ? $filters['priceRange']['min'] : null;
             $max_price = isset( $filters['priceRange']['max'] ) ? $filters['priceRange']['max'] : null;
-            $filtered_products = UPSPR_Product_Filter::filter_by_price_range(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_price_range(
                 $filtered_products,
                 $min_price,
                 $max_price
@@ -429,7 +429,7 @@ class UPSPR_Cross_Sell {
 
         // Stock status filter
         if ( isset( $filters['stockStatus'] ) && ! empty( $filters['stockStatus'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_stock_status(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_stock_status(
                 $filtered_products,
                 $filters['stockStatus']
             );
@@ -437,7 +437,7 @@ class UPSPR_Cross_Sell {
 
         // Product type filter
         if ( isset( $filters['productType'] ) && ! empty( $filters['productType'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_product_type(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_product_type(
                 $filtered_products,
                 $filters['productType']
             );
@@ -445,7 +445,7 @@ class UPSPR_Cross_Sell {
 
         // Brands filter
         if ( isset( $filters['brands'] ) && ! empty( $filters['brands'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_brands(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_brands(
                 $filtered_products,
                 $filters['brands'],
                 true
@@ -454,7 +454,7 @@ class UPSPR_Cross_Sell {
 
         // Attributes filter
         if ( isset( $filters['attributes'] ) && ! empty( $filters['attributes'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_attributes(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_attributes(
                 $filtered_products,
                 $filters['attributes'],
                 true
@@ -463,7 +463,7 @@ class UPSPR_Cross_Sell {
 
         // Exclude products
         if ( isset( $filters['excludeProducts'] ) && ! empty( $filters['excludeProducts'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::exclude_products(
+            $filtered_products = UPSPR_Product_Filter::upspr_exclude_products(
                 $filtered_products,
                 $filters['excludeProducts']
             );
@@ -471,7 +471,7 @@ class UPSPR_Cross_Sell {
 
         // Exclude categories
         if ( isset( $filters['excludeCategories'] ) && ! empty( $filters['excludeCategories'] ) ) {
-            $filtered_products = UPSPR_Product_Filter::filter_by_categories(
+            $filtered_products = UPSPR_Product_Filter::upspr_filter_by_categories(
                 $filtered_products,
                 $filters['excludeCategories'],
                 false
@@ -480,7 +480,7 @@ class UPSPR_Cross_Sell {
 
         // Exclude sale products
         if ( isset( $filters['excludeSaleProducts'] ) && $filters['excludeSaleProducts'] ) {
-            $filtered_products = UPSPR_Product_Filter::exclude_sale_products(
+            $filtered_products = UPSPR_Product_Filter::upspr_exclude_sale_products(
                 $filtered_products,
                 true
             );
@@ -488,7 +488,7 @@ class UPSPR_Cross_Sell {
 
         // Exclude featured products
         if ( isset( $filters['excludeFeaturedProducts'] ) && $filters['excludeFeaturedProducts'] ) {
-            $filtered_products = UPSPR_Product_Filter::exclude_featured_products(
+            $filtered_products = UPSPR_Product_Filter::upspr_exclude_featured_products(
                 $filtered_products,
                 true
             );
@@ -504,7 +504,7 @@ class UPSPR_Cross_Sell {
      * @param array $amplifiers Amplifier configuration
      * @return array Product IDs with amplifier scores
      */
-    private function apply_amplifiers( $product_ids, $amplifiers ) {
+    private function upspr_apply_amplifiers( $product_ids, $amplifiers ) {
         if ( empty( $product_ids ) || empty( $amplifiers ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -513,28 +513,28 @@ class UPSPR_Cross_Sell {
 
         // Sales performance boost
         if ( isset( $amplifiers['salesPerformanceBoost'] ) && $amplifiers['salesPerformanceBoost'] ) {
-            $score_arrays[] = UPSPR_Amplifier::apply_sales_performance_boost( $product_ids, $amplifiers );
+            $score_arrays[] = UPSPR_Amplifier::upspr_apply_sales_performance_boost( $product_ids, $amplifiers );
         }
 
         // Inventory level boost
         if ( isset( $amplifiers['inventoryLevelBoost'] ) && $amplifiers['inventoryLevelBoost'] ) {
-            $score_arrays[] = UPSPR_Amplifier::apply_inventory_level_boost( $product_ids, $amplifiers );
+            $score_arrays[] = UPSPR_Amplifier::upspr_apply_inventory_level_boost( $product_ids, $amplifiers );
         }
 
         // Seasonal trending boost
         if ( isset( $amplifiers['seasonalTrendingBoost'] ) && $amplifiers['seasonalTrendingBoost'] ) {
-            $score_arrays[] = UPSPR_Amplifier::apply_seasonal_trending_boost( $product_ids, $amplifiers );
+            $score_arrays[] = UPSPR_Amplifier::upspr_apply_seasonal_trending_boost( $product_ids, $amplifiers );
         }
 
         // Apply additional amplifiers
-        $score_arrays[] = UPSPR_Amplifier::apply_rating_boost( $product_ids, 4.0 );
-        $score_arrays[] = UPSPR_Amplifier::apply_new_product_boost( $product_ids, 30 );
+        $score_arrays[] = UPSPR_Amplifier::upspr_apply_rating_boost( $product_ids, 4.0 );
+        $score_arrays[] = UPSPR_Amplifier::upspr_apply_new_product_boost( $product_ids, 30 );
 
         // Combine all amplifier scores
         if ( empty( $score_arrays ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
-        return UPSPR_Amplifier::combine_amplifier_scores( $score_arrays );
+        return UPSPR_Amplifier::upspr_combine_amplifier_scores( $score_arrays );
     }
 
     /**
@@ -544,7 +544,7 @@ class UPSPR_Cross_Sell {
      * @param array $personalization Personalization configuration
      * @return array Product IDs with personalization scores
      */
-    private function apply_personalization( $product_ids, $personalization ) {
+    private function upspr_apply_personalization( $product_ids, $personalization ) {
         if ( empty( $product_ids ) || empty( $personalization ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -553,7 +553,7 @@ class UPSPR_Cross_Sell {
 
         // Purchase history personalization
         if ( isset( $personalization['purchaseHistoryBased'] ) && $personalization['purchaseHistoryBased'] ) {
-            $score_arrays[] = UPSPR_Personalization::apply_purchase_history_personalization(
+            $score_arrays[] = UPSPR_Personalization::upspr_apply_purchase_history_personalization(
                 $product_ids,
                 $personalization
             );
@@ -561,7 +561,7 @@ class UPSPR_Cross_Sell {
 
         // Browsing behavior personalization
         if ( isset( $personalization['browsingBehavior'] ) && $personalization['browsingBehavior'] ) {
-            $score_arrays[] = UPSPR_Personalization::apply_browsing_behavior_personalization(
+            $score_arrays[] = UPSPR_Personalization::upspr_apply_browsing_behavior_personalization(
                 $product_ids,
                 $personalization
             );
@@ -569,7 +569,7 @@ class UPSPR_Cross_Sell {
 
         // Customer segmentation
         if ( isset( $personalization['customerSegmentation'] ) && $personalization['customerSegmentation'] ) {
-            $score_arrays[] = UPSPR_Personalization::apply_customer_segmentation(
+            $score_arrays[] = UPSPR_Personalization::upspr_apply_customer_segmentation(
                 $product_ids,
                 $personalization
             );
@@ -577,14 +577,14 @@ class UPSPR_Cross_Sell {
 
         // Collaborative filtering
         if ( isset( $personalization['collaborativeFiltering'] ) && $personalization['collaborativeFiltering'] ) {
-            $score_arrays[] = UPSPR_Personalization::apply_collaborative_filtering(
+            $score_arrays[] = UPSPR_Personalization::upspr_apply_collaborative_filtering(
                 $product_ids,
                 $personalization
             );
         }
 
         // Geographic personalization
-        $score_arrays[] = UPSPR_Personalization::apply_geographic_personalization(
+        $score_arrays[] = UPSPR_Personalization::upspr_apply_geographic_personalization(
             $product_ids,
             $personalization
         );
@@ -620,7 +620,7 @@ class UPSPR_Cross_Sell {
      * @param array $personalization_scores Personalization scores
      * @return array Combined scores
      */
-    private function combine_scores( $amplifier_scores, $personalization_scores ) {
+    private function upspr_combine_scores( $amplifier_scores, $personalization_scores ) {
         $combined_scores = array();
 
         $all_product_ids = array_unique( array_merge(
@@ -645,7 +645,7 @@ class UPSPR_Cross_Sell {
      * @param array $product_ids Array of product IDs
      * @return array Formatted recommendations
      */
-    private function format_recommendations( $product_ids ) {
+    private function upspr_format_recommendations( $product_ids ) {
         $formatted = array();
         if ( empty( $product_ids ) ) {
             return $formatted;
@@ -689,7 +689,7 @@ class UPSPR_Cross_Sell {
      * @param int $products_count Number of products to return
      * @return array Array of product IDs
      */
-    private function get_fallback_recommendations( $products_count = 4 ) {
+    private function upspr_get_fallback_recommendations( $products_count = 4 ) {
         // Get popular or featured products as fallback
         $args = array(
             'post_type' => 'product',

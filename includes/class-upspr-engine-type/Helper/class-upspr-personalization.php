@@ -17,7 +17,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return array Personalized product IDs with scores
      */
-    public static function apply_purchase_history_personalization( $product_ids, $personalization_config, $user_id = null ) {
+    public static function upspr_apply_purchase_history_personalization( $product_ids, $personalization_config, $user_id = null ) {
         if ( empty( $product_ids ) || ! isset( $personalization_config['purchaseHistoryBased'] ) || ! $personalization_config['purchaseHistoryBased'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -34,11 +34,11 @@ class UPSPR_Personalization {
         $weight = isset( $personalization_config['purchaseHistoryWeight'] ) ? $personalization_config['purchaseHistoryWeight'] : 'medium';
 
         // Get user's purchase history
-        $purchase_history = self::get_user_purchase_history( $user_id, $period );
+        $purchase_history = self::upspr_get_user_purchase_history( $user_id, $period );
         
         // Calculate personalization scores
         $scores = array();
-        $weight_multiplier = self::get_weight_multiplier( $weight );
+        $weight_multiplier = self::upspr_get_weight_multiplier( $weight );
 
         foreach ( $product_ids as $product_id ) {
             $score = 1.0; // Base score
@@ -77,7 +77,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return array Personalized product IDs with scores
      */
-    public static function apply_browsing_behavior_personalization( $product_ids, $personalization_config, $user_id = null ) {
+    public static function upspr_apply_browsing_behavior_personalization( $product_ids, $personalization_config, $user_id = null ) {
         if ( empty( $product_ids ) || ! isset( $personalization_config['browsingBehavior'] ) || ! $personalization_config['browsingBehavior'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -87,10 +87,10 @@ class UPSPR_Personalization {
         $search_history_weight = isset( $personalization_config['searchHistoryWeight'] ) ? $personalization_config['searchHistoryWeight'] : 'high';
 
         // Get recently viewed products (from cookies or user meta)
-        $recently_viewed = self::get_recently_viewed_products( $user_id );
+        $recently_viewed = self::upspr_get_recently_viewed_products( $user_id );
         
         // Get search history (from cookies or user meta)
-        $search_history = self::get_user_search_history( $user_id );
+        $search_history = self::upspr_get_user_search_history( $user_id );
 
         $scores = array();
 
@@ -99,7 +99,7 @@ class UPSPR_Personalization {
             
             // Recently viewed boost
             if ( in_array( $product_id, $recently_viewed ) ) {
-                $score += 0.3 * self::get_weight_multiplier( $recently_viewed_weight );
+                $score += 0.3 * self::upspr_get_weight_multiplier( $recently_viewed_weight );
             }
             
             // Search history boost
@@ -110,7 +110,7 @@ class UPSPR_Personalization {
                 foreach ( $search_history as $search_term ) {
                     if ( stripos( $product_name, $search_term ) !== false || 
                          stripos( $product_content, $search_term ) !== false ) {
-                        $score += 0.4 * self::get_weight_multiplier( $search_history_weight );
+                        $score += 0.4 * self::upspr_get_weight_multiplier( $search_history_weight );
                         break;
                     }
                 }
@@ -130,7 +130,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return array Personalized product IDs with scores
      */
-    public static function apply_customer_segmentation( $product_ids, $personalization_config, $user_id = null ) {
+    public static function upspr_apply_customer_segmentation( $product_ids, $personalization_config, $user_id = null ) {
         if ( empty( $product_ids ) || ! isset( $personalization_config['customerSegmentation'] ) || ! $personalization_config['customerSegmentation'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -163,7 +163,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return array Personalized product IDs with scores
      */
-    public static function apply_collaborative_filtering( $product_ids, $personalization_config, $user_id = null ) {
+    public static function upspr_apply_collaborative_filtering( $product_ids, $personalization_config, $user_id = null ) {
         if ( empty( $product_ids ) || ! isset( $personalization_config['collaborativeFiltering'] ) || ! $personalization_config['collaborativeFiltering'] ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -180,7 +180,7 @@ class UPSPR_Personalization {
         $similarity_threshold = isset( $personalization_config['similarityThreshold'] ) ? $personalization_config['similarityThreshold'] : 'medium';
 
         // Find similar users based on purchase history
-        $similar_users = self::find_similar_users( $user_id, $similar_users_count, $similarity_threshold );
+        $similar_users = self::upspr_find_similar_users( $user_id, $similar_users_count, $similarity_threshold );
         
         if ( empty( $similar_users ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
@@ -189,7 +189,7 @@ class UPSPR_Personalization {
         // Get products purchased by similar users
         $similar_user_purchases = array();
         foreach ( $similar_users as $similar_user_id ) {
-            $purchases = self::get_user_purchase_history( $similar_user_id, 'last-180-days' );
+            $purchases = self::upspr_get_user_purchase_history( $similar_user_id, 'last-180-days' );
             $similar_user_purchases = array_merge( $similar_user_purchases, $purchases );
         }
 
@@ -213,7 +213,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID (optional, defaults to current user)
      * @return array Personalized product IDs with scores
      */
-    public static function apply_geographic_personalization( $product_ids, $personalization_config, $user_id = null ) {
+    public static function upspr_apply_geographic_personalization( $product_ids, $personalization_config, $user_id = null ) {
         if ( empty( $product_ids ) ) {
             return array_combine( $product_ids, array_fill( 0, count( $product_ids ), 1.0 ) );
         }
@@ -226,8 +226,8 @@ class UPSPR_Personalization {
         }
 
         // Get user's location (from billing address or IP geolocation)
-        $user_country = self::get_user_country( $user_id );
-        $user_state = self::get_user_state( $user_id );
+        $user_country = self::upspr_get_user_country( $user_id );
+        $user_state = self::upspr_get_user_state( $user_id );
 
         $location_matches = false;
 
@@ -257,7 +257,7 @@ class UPSPR_Personalization {
      * @param string $weight Weight setting (low, medium, high)
      * @return float Weight multiplier
      */
-    private static function get_weight_multiplier( $weight ) {
+    private static function upspr_get_weight_multiplier( $weight ) {
         switch ( $weight ) {
             case 'low':
                 return 0.5;
@@ -277,8 +277,8 @@ class UPSPR_Personalization {
      * @param string $period Time period
      * @return array Array of purchased product IDs
      */
-    private static function get_user_purchase_history( $user_id, $period ) {
-        $days = self::get_days_from_period( $period );
+    private static function upspr_get_user_purchase_history( $user_id, $period ) {
+        $days = self::upspr_get_days_from_period( $period );
         
         $orders = wc_get_orders( array(
             'customer_id' => $user_id,
@@ -303,10 +303,10 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return array Array of recently viewed product IDs
      */
-    private static function get_recently_viewed_products( $user_id = null ) {
+    private static function upspr_get_recently_viewed_products( $user_id = null ) {
         // Try to get from WooCommerce recently viewed products
-        if ( function_exists( 'wc_get_recently_viewed_products' ) ) {
-            return wc_get_recently_viewed_products();
+        if ( function_exists( 'wc_upspr_get_recently_viewed_products' ) ) {
+            return wc_upspr_get_recently_viewed_products();
         }
 
         // Fallback to cookies
@@ -324,7 +324,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return array Array of search terms
      */
-    private static function get_user_search_history( $user_id = null ) {
+    private static function upspr_get_user_search_history( $user_id = null ) {
         // This would typically be stored in user meta or cookies
         // For now, return empty array - implement based on your search tracking
         return array();
@@ -346,11 +346,11 @@ class UPSPR_Personalization {
         // This is a simplified example
         switch ( $customer_type ) {
             case 'new-customers':
-                return self::is_new_customer( $user_id );
+                return self::upspr_is_new_customer( $user_id );
             case 'returning-customers':
-                return ! self::is_new_customer( $user_id );
+                return ! self::upspr_is_new_customer( $user_id );
             case 'vip-customers':
-                return self::is_vip_customer( $user_id );
+                return self::upspr_is_vip_customer( $user_id );
             default:
                 return true;
         }
@@ -390,11 +390,11 @@ class UPSPR_Personalization {
      * @param string $threshold Similarity threshold
      * @return array Array of similar user IDs
      */
-    private static function find_similar_users( $user_id, $limit, $threshold ) {
+    private static function upspr_find_similar_users( $user_id, $limit, $threshold ) {
         // This is a simplified implementation
         // In a real scenario, you'd use more sophisticated similarity algorithms
         
-        $user_purchases = self::get_user_purchase_history( $user_id, 'last-180-days' );
+        $user_purchases = self::upspr_get_user_purchase_history( $user_id, 'last-180-days' );
         
         if ( empty( $user_purchases ) ) {
             return array();
@@ -445,7 +445,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return string Country code
      */
-    private static function get_user_country( $user_id = null ) {
+    private static function upspr_get_user_country( $user_id = null ) {
         if ( $user_id ) {
             return get_user_meta( $user_id, 'billing_country', true );
         }
@@ -460,7 +460,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return string State code
      */
-    private static function get_user_state( $user_id = null ) {
+    private static function upspr_get_user_state( $user_id = null ) {
         if ( $user_id ) {
             $country = get_user_meta( $user_id, 'billing_country', true );
             $state = get_user_meta( $user_id, 'billing_state', true );
@@ -481,7 +481,7 @@ class UPSPR_Personalization {
      * @param string $period Period string
      * @return int Number of days
      */
-    private static function get_days_from_period( $period ) {
+    private static function upspr_get_days_from_period( $period ) {
         switch ( $period ) {
             case 'last-7-days':
                 return 7;
@@ -504,7 +504,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return bool Whether user is new
      */
-    private static function is_new_customer( $user_id ) {
+    private static function upspr_is_new_customer( $user_id ) {
         $orders = wc_get_orders( array(
             'customer_id' => $user_id,
             'status' => array( 'completed', 'processing' ),
@@ -520,7 +520,7 @@ class UPSPR_Personalization {
      * @param int $user_id User ID
      * @return bool Whether user is VIP
      */
-    private static function is_vip_customer( $user_id ) {
+    private static function upspr_is_vip_customer( $user_id ) {
         $total_spent = wc_get_customer_total_spent( $user_id );
         return $total_spent > 1000; // Example threshold
     }

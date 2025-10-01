@@ -17,7 +17,7 @@ class UPSPR_Product_Filter {
      * @param bool $include Whether to include (true) or exclude (false) these categories
      * @return array Filtered product IDs
      */
-    public static function filter_by_categories( $product_ids, $category_ids, $include = true ) {
+    public static function upspr_filter_by_categories( $product_ids, $category_ids, $include = true ) {
         if ( empty( $product_ids ) || empty( $category_ids ) ) {
             return $product_ids;
         }
@@ -46,7 +46,7 @@ class UPSPR_Product_Filter {
      * @param bool $include Whether to include (true) or exclude (false) these tags
      * @return array Filtered product IDs
      */
-    public static function filter_by_tags( $product_ids, $tag_ids, $include = true ) {
+    public static function upspr_filter_by_tags( $product_ids, $tag_ids, $include = true ) {
         if ( empty( $product_ids ) || empty( $tag_ids ) ) {
             return $product_ids;
         }
@@ -78,7 +78,7 @@ class UPSPR_Product_Filter {
      * @param bool $include Whether to include (true) or exclude (false) these brands
      * @return array Filtered product IDs
      */
-    public static function filter_by_brands( $product_ids, $brand_ids, $include = true ) {
+    public static function upspr_filter_by_brands( $product_ids, $brand_ids, $include = true ) {
         if ( empty( $product_ids ) || empty( $brand_ids ) ) {
             return $product_ids;
         }
@@ -123,7 +123,7 @@ class UPSPR_Product_Filter {
      * @param bool $include Whether to include (true) or exclude (false) these attributes
      * @return array Filtered product IDs
      */
-    public static function filter_by_attributes( $product_ids, $attribute_ids, $include = true ) {
+    public static function upspr_filter_by_attributes( $product_ids, $attribute_ids, $include = true ) {
         if ( empty( $product_ids ) || empty( $attribute_ids ) ) {
             return $product_ids;
         }
@@ -163,7 +163,7 @@ class UPSPR_Product_Filter {
      * @param float $max_price Maximum price
      * @return array Filtered product IDs
      */
-    public static function filter_by_price_range( $product_ids, $min_price = null, $max_price = null ) {
+    public static function upspr_filter_by_price_range( $product_ids, $min_price = null, $max_price = null ) {
         if ( empty( $product_ids ) || ( is_null( $min_price ) && is_null( $max_price ) ) ) {
             return $product_ids;
         }
@@ -197,7 +197,7 @@ class UPSPR_Product_Filter {
      * @param string $stock_status Stock status ('in-stock', 'out-of-stock', 'on-backorder')
      * @return array Filtered product IDs
      */
-    public static function filter_by_stock_status( $product_ids, $stock_status ) {
+    public static function upspr_filter_by_stock_status( $product_ids, $stock_status ) {
         if ( empty( $product_ids ) || empty( $stock_status ) || $stock_status === 'any' ) {
             return $product_ids;
         }
@@ -237,7 +237,7 @@ class UPSPR_Product_Filter {
      * @param string $product_type Product type ('simple', 'variable', 'grouped', 'external', 'any')
      * @return array Filtered product IDs
      */
-    public static function filter_by_product_type( $product_ids, $product_type ) {
+    public static function upspr_filter_by_product_type( $product_ids, $product_type ) {
         if ( empty( $product_ids ) || empty( $product_type ) || $product_type === 'any' ) {
             return $product_ids;
         }
@@ -266,7 +266,7 @@ class UPSPR_Product_Filter {
      * @param array $exclude_ids Array of product IDs to exclude
      * @return array Filtered product IDs
      */
-    public static function exclude_products( $product_ids, $exclude_ids ) {
+    public static function upspr_exclude_products( $product_ids, $exclude_ids ) {
         if ( empty( $product_ids ) || empty( $exclude_ids ) ) {
             return $product_ids;
         }
@@ -281,7 +281,7 @@ class UPSPR_Product_Filter {
      * @param bool $exclude_sale Whether to exclude sale products
      * @return array Filtered product IDs
      */
-    public static function exclude_sale_products( $product_ids, $exclude_sale ) {
+    public static function upspr_exclude_sale_products( $product_ids, $exclude_sale ) {
         if ( empty( $product_ids ) || ! $exclude_sale ) {
             return $product_ids;
         }
@@ -310,7 +310,7 @@ class UPSPR_Product_Filter {
      * @param bool $exclude_featured Whether to exclude featured products
      * @return array Filtered product IDs
      */
-    public static function exclude_featured_products( $product_ids, $exclude_featured ) {
+    public static function upspr_exclude_featured_products( $product_ids, $exclude_featured ) {
         if ( empty( $product_ids ) || ! $exclude_featured ) {
             return $product_ids;
         }

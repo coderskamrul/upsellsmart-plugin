@@ -17,7 +17,7 @@ class UPSPR_Admin {
     /**
      * Get instance
      */
-    public static function get_instance() {
+    public static function upspr_get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -28,22 +28,22 @@ class UPSPR_Admin {
      * Constructor
      */
     private function __construct() {
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
-        add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-        add_action( 'wp_ajax_upspr_get_categories', array( $this, 'ajax_get_categories' ) );
-        add_action( 'wp_ajax_upspr_get_tags', array( $this, 'ajax_get_tags' ) );
-        add_action( 'wp_ajax_upspr_get_brands', array( $this, 'ajax_get_brands' ) );
-        add_action( 'wp_ajax_upspr_get_attributes', array( $this, 'ajax_get_attributes' ) );
-        add_action( 'wp_ajax_upspr_get_products', array( $this, 'ajax_get_products' ) );
-        add_action( 'wp_ajax_upspr_get_products_by_ids', array( $this, 'ajax_get_products_by_ids' ) );
-        add_action( 'wp_ajax_upspr_get_countries', array( $this, 'ajax_get_countries' ) );
-        add_action( 'wp_ajax_upspr_get_states', array( $this, 'ajax_get_states' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'upspr_enqueue_admin_scripts' ) );
+        add_action( 'admin_menu', array( $this, 'upspr_add_admin_menu' ) );
+        add_action( 'wp_ajax_upspr_get_categories', array( $this, 'upspr_ajax_get_categories' ) );
+        add_action( 'wp_ajax_upspr_get_tags', array( $this, 'upspr_ajax_get_tags' ) );
+        add_action( 'wp_ajax_upspr_get_brands', array( $this, 'upspr_ajax_get_brands' ) );
+        add_action( 'wp_ajax_upspr_get_attributes', array( $this, 'upspr_ajax_get_attributes' ) );
+        add_action( 'wp_ajax_upspr_get_products', array( $this, 'upspr_ajax_get_products' ) );
+        add_action( 'wp_ajax_upspr_get_products_by_ids', array( $this, 'upspr_ajax_get_products_by_ids' ) );
+        add_action( 'wp_ajax_upspr_get_countries', array( $this, 'upspr_ajax_get_countries' ) );
+        add_action( 'wp_ajax_upspr_get_states', array( $this, 'upspr_ajax_get_states' ) );
     }
 
     /**
      * Enqueue admin scripts
      */
-    public function enqueue_admin_scripts( $hook ) {
+    public function upspr_enqueue_admin_scripts( $hook ) {
         // Only load on our admin pages
         if ( strpos( $hook, 'upsellsmart' ) === false ) {
             return;
@@ -109,14 +109,14 @@ class UPSPR_Admin {
     /**
      * Add admin menu
      */
-    public function add_admin_menu() {
+    public function upspr_add_admin_menu() {
         // Main menu page
         add_menu_page(
             __( 'UpSellSmart', 'upsellsmart-product-recommendations' ),
             __( 'UpSellSmart', 'upsellsmart-product-recommendations' ),
             'manage_woocommerce',
             'upsellsmart',
-            array( $this, 'admin_page' ),
+            array( $this, 'upspr_admin_page' ),
             'dashicons-chart-line',
             56
         );
@@ -128,7 +128,7 @@ class UPSPR_Admin {
             __( 'Dashboard', 'upsellsmart-product-recommendations' ),
             'manage_woocommerce',
             'upsellsmart',
-            array( $this, 'admin_page' )
+            array( $this, 'upspr_admin_page' )
         );
 
         add_submenu_page(
@@ -137,7 +137,7 @@ class UPSPR_Admin {
             __( 'Recommendations', 'upsellsmart-product-recommendations' ),
             'manage_woocommerce',
             'upsellsmart-recommendations',
-            array( $this, 'admin_page' )
+            array( $this, 'upspr_admin_page' )
         );
 
         add_submenu_page(
@@ -146,7 +146,7 @@ class UPSPR_Admin {
             __( 'Settings', 'upsellsmart-product-recommendations' ),
             'manage_woocommerce',
             'upsellsmart-settings',
-            array( $this, 'admin_page' )
+            array( $this, 'upspr_admin_page' )
         );
 
         // Add test page for middleware (only in development)
@@ -157,7 +157,7 @@ class UPSPR_Admin {
                 __( 'Middleware Test', 'upsellsmart-product-recommendations' ),
                 'manage_woocommerce',
                 'upsellsmart-test',
-                array( $this, 'admin_page' )
+                array( $this, 'upspr_admin_page' )
             );
         }
     }
@@ -165,14 +165,14 @@ class UPSPR_Admin {
     /**
      * Admin page callback
      */
-    public function admin_page() {
+    public function upspr_admin_page() {
         echo '<div id="upspr-admin-root"></div>';
     }
 
     /**
      * AJAX handler to get WooCommerce categories
      */
-    public function ajax_get_categories() {
+    public function upspr_ajax_get_categories() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -210,7 +210,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler to get WooCommerce tags
      */
-    public function ajax_get_tags() {
+    public function upspr_ajax_get_tags() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -248,7 +248,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler to get WooCommerce brands
      */
-    public function ajax_get_brands() {
+    public function upspr_ajax_get_brands() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -302,7 +302,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler to get WooCommerce attributes
      */
-    public function ajax_get_attributes() {
+    public function upspr_ajax_get_attributes() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -323,7 +323,7 @@ class UPSPR_Admin {
         $formatted_attributes = array();
         foreach ( $attributes as $attribute ) {
             $taxonomy = wc_attribute_taxonomy_name( $attribute->attribute_name );
-            
+
             // Get terms for this attribute
             $terms = get_terms( array(
                 'taxonomy' => $taxonomy,
@@ -357,7 +357,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler to get WooCommerce products
      */
-    public function ajax_get_products() {
+    public function upspr_ajax_get_products() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -416,7 +416,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler to get WooCommerce products by IDs
      */
-    public function ajax_get_products_by_ids() {
+    public function upspr_ajax_get_products_by_ids() {
         // Check nonce for security
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_die( 'Security check failed' );
@@ -471,7 +471,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler for getting countries
      */
-    public function ajax_get_countries() {
+    public function upspr_ajax_get_countries() {
         // Verify nonce
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_send_json_error( 'Invalid nonce' );
@@ -499,7 +499,7 @@ class UPSPR_Admin {
     /**
      * AJAX handler for getting states
      */
-    public function ajax_get_states() {
+    public function upspr_ajax_get_states() {
         // Verify nonce
         if ( ! wp_verify_nonce( $_POST['nonce'], 'upspr_admin_nonce' ) ) {
             wp_send_json_error( 'Invalid nonce' );
@@ -516,7 +516,7 @@ class UPSPR_Admin {
         foreach ( $country_codes as $country_code ) {
             $country_code = trim( $country_code );
             $states = WC()->countries->get_states( $country_code );
-            
+
             if ( ! empty( $states ) ) {
                 foreach ( $states as $state_code => $state_name ) {
                     $all_states[] = array(
