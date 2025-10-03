@@ -89,7 +89,7 @@ function upspr_validate_campaign_location( $campaign_data ) {
  * @return object|false Campaign instance or false on failure
  */
 function upspr_create_campaign( $campaign_data ) {
-    return UPSPR_Campaign_Factory::create_campaign( $campaign_data );
+    return UPSPR_Campaign_Factory::upspr_create_campaign( $campaign_data );
 }
 
 /**
@@ -99,7 +99,7 @@ function upspr_create_campaign( $campaign_data ) {
  * @return string HTML output
  */
 function upspr_render_campaigns( $campaigns ) {
-    return UPSPR_Campaign_Factory::render_campaigns( $campaigns );
+    return UPSPR_Campaign_Factory::upspr_render_campaigns( $campaigns );
 }
 
 /**
@@ -108,7 +108,7 @@ function upspr_render_campaigns( $campaigns ) {
  * @return array Available campaign types
  */
 function upspr_get_campaign_types() {
-    return UPSPR_Campaign_Factory::get_available_types();
+    return UPSPR_Campaign_Factory::upspr_get_available_types();
 }
 
 /**
@@ -117,7 +117,7 @@ function upspr_get_campaign_types() {
  * @return array Campaign type labels
  */
 function upspr_get_campaign_type_labels() {
-    return UPSPR_Campaign_Factory::get_type_labels();
+    return UPSPR_Campaign_Factory::upspr_get_type_labels();
 }
 
 /**
@@ -126,5 +126,5 @@ function upspr_get_campaign_type_labels() {
  * @return array Campaign type descriptions
  */
 function upspr_get_campaign_type_descriptions() {
-    return UPSPR_Campaign_Factory::get_type_descriptions();
+    return UPSPR_Campaign_Factory::upspr_get_type_descriptions();
 }

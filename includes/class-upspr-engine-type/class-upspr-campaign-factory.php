@@ -13,7 +13,7 @@ class UPSPR_Campaign_Factory {
      * Available campaign types
      */
     private static $campaign_types = array(
-        'cross-sell' => 'UPSPR_Cross_Sell',
+        //'cross-sell' => 'UPSPR_Cross_Sell',
         'upsell' => 'UPSPR_Upsell',
         'related-products' => 'UPSPR_Related_Products',
         'frequently-bought-together' => 'UPSPR_Frequently_Bought_Together',

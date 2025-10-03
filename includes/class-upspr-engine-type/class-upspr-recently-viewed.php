@@ -73,11 +73,6 @@ class UPSPR_Recently_Viewed {
         $recommendations = $this->upspr_get_recently_viewed_recommendations( $recently_viewed );
         $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
-        // Display the campaign using the location display system
-        if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'recently-viewed' );
-        }
-
         return $formatted_recommendations;
     }
 

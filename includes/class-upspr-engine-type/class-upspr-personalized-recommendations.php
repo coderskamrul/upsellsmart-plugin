@@ -33,11 +33,6 @@ class UPSPR_Personalized_Recommendations {
         $recommendations = $this->upspr_get_personalized_recommendations( $user_id );
         $formatted_recommendations = $this->upspr_format_recommendations( $recommendations );
 
-        // Display the campaign using the location display system
-        if ( ! empty( $formatted_recommendations ) ) {
-            UPSPR_Location_Display::upspr_display_campaign( $this->campaign_data, $formatted_recommendations, 'personalized-recommendations' );
-        }
-
         return $formatted_recommendations;
     }
 
