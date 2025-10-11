@@ -166,7 +166,17 @@ class UPSPR_Admin {
      * Admin page callback
      */
     public function upspr_admin_page() {
-        echo '<div id="upspr-admin-root"></div>';
+        echo '<div id="upspr-admin-root" class="upspr-admin-container"></div>';
+        echo '<style>
+            .upspr-admin-container {
+                margin: -10px -20px 0 -20px;
+            }
+            @media (max-width: 782px) {
+                .upspr-admin-container {
+                    margin: -10px -10px 0 -10px;
+                }
+            }
+        </style>';
     }
 
     /**

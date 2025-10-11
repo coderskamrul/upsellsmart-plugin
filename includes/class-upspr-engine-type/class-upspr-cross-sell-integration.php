@@ -240,10 +240,42 @@ class UPSPR_Cross_Sell_Integration {
      * Get campaign performance summary
      *
      * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format, optional)
+     * @param string $end_date End date (Y-m-d format, optional)
      * @return array Performance summary
      */
-    public static function upspr_get_campaign_performance_summary( $campaign_id ) {
+    public static function upspr_get_campaign_performance_summary( $campaign_id, $start_date = null, $end_date = null ) {
+        // If date range is provided, use date-based query
+        if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
+            return UPSPR_Performance_Tracker::upspr_get_performance_summary_by_date( $campaign_id, $start_date, $end_date );
+        }
+
+        // Otherwise, return all-time summary
         return UPSPR_Performance_Tracker::upspr_get_performance_summary( $campaign_id );
+    }
+
+    /**
+     * Get campaign analytics by date range
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format)
+     * @param string $end_date End date (Y-m-d format)
+     * @return array Analytics data grouped by date
+     */
+    public static function upspr_get_campaign_analytics_by_date( $campaign_id, $start_date = null, $end_date = null ) {
+        return UPSPR_Performance_Tracker::upspr_get_analytics_by_date_range( $campaign_id, $start_date, $end_date );
+    }
+
+    /**
+     * Get product-level performance for a campaign
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format, optional)
+     * @param string $end_date End date (Y-m-d format, optional)
+     * @return array Product performance data
+     */
+    public static function upspr_get_product_performance( $campaign_id, $start_date = null, $end_date = null ) {
+        return UPSPR_Performance_Tracker::upspr_get_product_performance_by_date( $campaign_id, $start_date, $end_date );
     }
 
     /**

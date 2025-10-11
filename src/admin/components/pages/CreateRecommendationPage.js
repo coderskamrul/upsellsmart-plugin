@@ -437,8 +437,25 @@ const CreateRecommendationPage = ({ onBack, onCampaignCreated, editMode = false,
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Failed to ${editMode ? 'update' : 'create'} campaign`)
+        let errorMessage = `Failed to ${editMode ? 'update' : 'create'} campaign`
+
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorMessage
+        } catch (parseError) {
+          // If response is not JSON (e.g., HTML error page), get text
+          const errorText = await response.text()
+          console.error('Non-JSON error response:', errorText)
+
+          // Extract meaningful error message from HTML if possible
+          if (errorText.includes('critical error')) {
+            errorMessage = 'A critical error occurred on the server. Please check the server logs.'
+          } else {
+            errorMessage = `Server error (${response.status}): ${response.statusText}`
+          }
+        }
+
+        throw new Error(errorMessage)
       }
 
       const resultCampaign = await response.json()

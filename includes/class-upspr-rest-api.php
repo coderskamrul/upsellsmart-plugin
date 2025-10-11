@@ -231,6 +231,78 @@ class UPSPR_REST_API {
                 )
             )
         ) );
+
+        // Get campaign analytics by date range
+        register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)/analytics', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'upspr_get_campaign_analytics' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
+            'args' => array(
+                'id' => array(
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
+                ),
+                'start_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                'end_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                )
+            )
+        ) );
+
+        // Get campaign performance summary with date range
+        register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)/performance', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'upspr_get_campaign_performance' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
+            'args' => array(
+                'id' => array(
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
+                ),
+                'start_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                'end_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                )
+            )
+        ) );
+
+        // Get product-level performance with date range
+        register_rest_route( $this->namespace, '/campaigns/(?P<id>\d+)/products-performance', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'upspr_get_product_performance' ),
+            'permission_callback' => array( $this, 'upspr_check_admin_permissions' ),
+            'args' => array(
+                'id' => array(
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
+                ),
+                'start_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                'end_date' => array(
+                    'type' => 'string',
+                    'format' => 'date',
+                    'sanitize_callback' => 'sanitize_text_field'
+                )
+            )
+        ) );
     }
 
     /**
@@ -294,13 +366,13 @@ class UPSPR_REST_API {
             'performance' => $request->get_param( 'performance' )
         );
 
-        $campaign_id = $this->database->create_campaign( $data );
+        $campaign_id = $this->database->upspr_create_campaign( $data );
 
         if ( is_wp_error( $campaign_id ) ) {
             return $campaign_id;
         }
 
-        $campaign = $this->database->get_campaign( $campaign_id );
+        $campaign = $this->database->upspr_get_campaign( $campaign_id );
 
         return rest_ensure_response( $campaign );
     }
@@ -371,5 +443,80 @@ class UPSPR_REST_API {
         }
 
         return rest_ensure_response( array( 'deleted' => true, 'id' => $id ) );
+    }
+
+    /**
+     * Get campaign analytics by date range
+     */
+    public function upspr_get_campaign_analytics( $request ) {
+        $id = $request->get_param( 'id' );
+        $start_date = $request->get_param( 'start_date' );
+        $end_date = $request->get_param( 'end_date' );
+
+        // Check if campaign exists
+        $existing_campaign = $this->database->upspr_get_campaign( $id );
+        if ( ! $existing_campaign ) {
+            return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
+        }
+
+        // Get analytics data
+        $analytics = UPSPR_Cross_Sell_Integration::upspr_get_campaign_analytics_by_date( $id, $start_date, $end_date );
+
+        return rest_ensure_response( array(
+            'campaign_id' => $id,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'data' => $analytics
+        ) );
+    }
+
+    /**
+     * Get campaign performance summary with date range
+     */
+    public function upspr_get_campaign_performance( $request ) {
+        $id = $request->get_param( 'id' );
+        $start_date = $request->get_param( 'start_date' );
+        $end_date = $request->get_param( 'end_date' );
+
+        // Check if campaign exists
+        $existing_campaign = $this->database->upspr_get_campaign( $id );
+        if ( ! $existing_campaign ) {
+            return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
+        }
+
+        // Get performance summary
+        $performance = UPSPR_Cross_Sell_Integration::upspr_get_campaign_performance_summary( $id, $start_date, $end_date );
+
+        return rest_ensure_response( array(
+            'campaign_id' => $id,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'performance' => $performance
+        ) );
+    }
+
+    /**
+     * Get product-level performance with date range
+     */
+    public function upspr_get_product_performance( $request ) {
+        $id = $request->get_param( 'id' );
+        $start_date = $request->get_param( 'start_date' );
+        $end_date = $request->get_param( 'end_date' );
+
+        // Check if campaign exists
+        $existing_campaign = $this->database->upspr_get_campaign( $id );
+        if ( ! $existing_campaign ) {
+            return new WP_Error( 'campaign_not_found', 'Campaign not found', array( 'status' => 404 ) );
+        }
+
+        // Get product performance
+        $products = UPSPR_Cross_Sell_Integration::upspr_get_product_performance( $id, $start_date, $end_date );
+
+        return rest_ensure_response( array(
+            'campaign_id' => $id,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'products' => $products
+        ) );
     }
 }

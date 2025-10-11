@@ -17,7 +17,7 @@ class UPSPR_Activator {
         if ( ! class_exists( 'UPSPR_Database' ) ) {
             require_once UPSPR_PLUGIN_PATH . 'includes/class-upspr-database.php';
         }
-        UPSPR_Database::get_instance();
+        UPSPR_Database::upspr_get_instance();
 
         // Set default options
         self::upspr_set_default_options();

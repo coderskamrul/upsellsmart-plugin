@@ -3,13 +3,16 @@
 import { useState, useEffect } from "react"
 import { Toaster } from "react-hot-toast"
 import { ToastProvider } from "./context/ToastContext"
+import Navbar from "./common/Navbar"
 import DashboardPage from "./pages/DashboardPage"
+import CampaignAnalyticsPage from "./pages/CampaignAnalyticsPage"
 import RecommendationsPage from "./pages/RecommendationsPage"
 import SettingsPage from "./pages/SettingsPage"
 import MiddlewareTestPage from "./MiddlewareTestPage"
 
 const AdminApp = () => {
   const [currentPage, setCurrentPage] = useState("dashboard")
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null)
 
   useEffect(() => {
     // Function to determine current page
@@ -39,7 +42,19 @@ const AdminApp = () => {
     setCurrentPage(detectedPage)
   }, [])
 
+  const handleViewCampaign = (campaignId) => {
+    console.log('AdminApp: handleViewCampaign called with ID:', campaignId, 'Type:', typeof campaignId)
+    setSelectedCampaignId(campaignId)
+  }
+
+  const handleBackToDashboard = () => {
+    console.log('AdminApp: handleBackToDashboard called')
+    setSelectedCampaignId(null)
+  }
+
   const renderCurrentPage = () => {
+    console.log('AdminApp: renderCurrentPage - currentPage:', currentPage, 'selectedCampaignId:', selectedCampaignId)
+
     switch (currentPage) {
       case 'recommendations':
         return <RecommendationsPage />
@@ -48,7 +63,13 @@ const AdminApp = () => {
       case 'test':
         return <MiddlewareTestPage />
       default:
-        return <DashboardPage />
+        // Dashboard with campaign analytics view
+        if (selectedCampaignId) {
+          console.log('AdminApp: Rendering CampaignAnalyticsPage with ID:', selectedCampaignId)
+          return <CampaignAnalyticsPage campaignId={selectedCampaignId} onBack={handleBackToDashboard} />
+        }
+        console.log('AdminApp: Rendering DashboardPage')
+        return <DashboardPage onViewCampaign={handleViewCampaign} />
     }
   }
 
@@ -76,13 +97,12 @@ const AdminApp = () => {
 
   return (
     <ToastProvider>
-      <div className="upspr-admin-wrapper min-h-screen bg-white p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">UpSellSmart – {getPageTitle()}</h1>
-            <p className="text-gray-600">{getPageDescription()}</p>
-          </div> */}
+      <div className="upspr-admin-wrapper min-h-screen bg-gray-50">
+        {/* Navigation Bar */}
+        <Navbar currentPage={currentPage} />
 
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {renderCurrentPage()}
         </div>
       </div>

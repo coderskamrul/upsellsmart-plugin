@@ -39,29 +39,15 @@ class UPSPR_Performance_Tracker {
             return false;
         }
 
-        // Get current performance data
+        // Track in analytics table for date-based filtering
+        $success = self::upspr_insert_analytics_event( $campaign_id, 'impression', null, 0 );
+
+        // Update summary performance data
         $performance = self::upspr_get_campaign_performance( $campaign_id );
-
-        // Increment impressions
         $performance['impressions'] = isset( $performance['impressions'] ) ? $performance['impressions'] + 1 : 1;
+        self::upspr_update_campaign_performance( $campaign_id, $performance );
 
-        // Update last impression timestamp
-        $performance['last_impression'] = current_time( 'mysql' );
-
-        // Track which products were shown
-        if ( ! empty( $product_ids ) ) {
-            if ( ! isset( $performance['product_impressions'] ) ) {
-                $performance['product_impressions'] = array();
-            }
-
-            foreach ( $product_ids as $product_id ) {
-                if ( ! isset( $performance['product_impressions'][ $product_id ] ) ) {
-                    $performance['product_impressions'][ $product_id ] = 0;
-                }
-                $performance['product_impressions'][ $product_id ]++;
-            }
-        }
-        return self::upspr_update_campaign_performance( $campaign_id, $performance );
+        return $success;
     }
 
     /**
@@ -157,28 +143,27 @@ class UPSPR_Performance_Tracker {
             return false;
         }
 
-        // Get current performance data
-        $performance = self::upspr_get_campaign_performance( $campaign_id );
+        // Track in analytics table for date-based filtering
+        $success = self::upspr_insert_analytics_event( $campaign_id, 'click', $product_id, 0 );
 
-        // Increment clicks
+        // Update summary performance data
+        $performance = self::upspr_get_campaign_performance( $campaign_id );
         $performance['clicks'] = isset( $performance['clicks'] ) ? intval($performance['clicks']) + 1 : 1;
 
-        // Update last click timestamp
-        $performance['last_click'] = current_time( 'mysql' );
-
-        // Track which product was clicked
+        // Track product-level clicks for detailed reporting
         if ( ! empty( $product_id ) ) {
             if ( ! isset( $performance['product_clicks'] ) ) {
                 $performance['product_clicks'] = array();
             }
-
             if ( ! isset( $performance['product_clicks'][ $product_id ] ) ) {
                 $performance['product_clicks'][ $product_id ] = 0;
             }
             $performance['product_clicks'][ $product_id ]++;
         }
 
-        return self::upspr_update_campaign_performance( $campaign_id, $performance );
+        self::upspr_update_campaign_performance( $campaign_id, $performance );
+
+        return $success;
     }
 
     /**
@@ -200,36 +185,32 @@ class UPSPR_Performance_Tracker {
             return false;
         }
 
-        // Get current performance data
+        // Track in analytics table for date-based filtering
+        $success = self::upspr_insert_analytics_event( $campaign_id, 'conversion', $product_id, $revenue );
+
+        // Update summary performance data
         $performance = self::upspr_get_campaign_performance( $campaign_id );
-
-        // Increment conversions
         $performance['conversions'] = isset( $performance['conversions'] ) ? $performance['conversions'] + 1 : 1;
-
-        // Add revenue
         $performance['revenue'] = isset( $performance['revenue'] ) ? $performance['revenue'] + $revenue : $revenue;
 
-        // Update last conversion timestamp
-        $performance['last_conversion'] = current_time( 'mysql' );
-
-        // Track which product was converted
+        // Track product-level conversions for detailed reporting
         if ( ! empty( $product_id ) ) {
             if ( ! isset( $performance['product_conversions'] ) ) {
                 $performance['product_conversions'] = array();
             }
-
             if ( ! isset( $performance['product_conversions'][ $product_id ] ) ) {
                 $performance['product_conversions'][ $product_id ] = array(
                     'count' => 0,
                     'revenue' => 0
                 );
             }
-
             $performance['product_conversions'][ $product_id ]['count']++;
             $performance['product_conversions'][ $product_id ]['revenue'] += $revenue;
         }
 
-        return self::upspr_update_campaign_performance( $campaign_id, $performance );
+        self::upspr_update_campaign_performance( $campaign_id, $performance );
+
+        return $success;
     }
 
     /**
@@ -446,5 +427,234 @@ class UPSPR_Performance_Tracker {
         $result = self::upspr_track_click( $campaign_id, $product_id, $campaign_type );
 
         wp_send_json_success( array( 'tracked' => $result ) );
+    }
+
+    /**
+     * Insert analytics event into the analytics table
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $event_type Event type (impression, click, conversion)
+     * @param int|null $product_id Product ID (optional)
+     * @param float $revenue Revenue amount (for conversions)
+     * @return bool Success status
+     */
+    private static function upspr_insert_analytics_event( $campaign_id, $event_type, $product_id = null, $revenue = 0 ) {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+        $current_datetime = current_time( 'mysql' );
+        $current_date = current_time( 'Y-m-d' );
+
+        $result = $wpdb->insert(
+            $analytics_table,
+            array(
+                'campaign_id' => $campaign_id,
+                'event_type' => $event_type,
+                'product_id' => $product_id,
+                'revenue' => $revenue,
+                'event_date' => $current_date,
+                'event_datetime' => $current_datetime
+            ),
+            array( '%d', '%s', '%d', '%f', '%s', '%s' )
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * Get analytics data for a campaign within a date range
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format)
+     * @param string $end_date End date (Y-m-d format)
+     * @return array Analytics data grouped by date
+     */
+    public static function upspr_get_analytics_by_date_range( $campaign_id, $start_date = null, $end_date = null ) {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+
+        // Default to last 30 days if no dates provided
+        if ( empty( $start_date ) ) {
+            $start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
+        }
+        if ( empty( $end_date ) ) {
+            $end_date = current_time( 'Y-m-d' );
+        }
+
+        $query = $wpdb->prepare(
+            "SELECT
+                event_date,
+                event_type,
+                COUNT(*) as count,
+                SUM(revenue) as total_revenue
+            FROM {$analytics_table}
+            WHERE campaign_id = %d
+            AND event_date BETWEEN %s AND %s
+            GROUP BY event_date, event_type
+            ORDER BY event_date ASC",
+            $campaign_id,
+            $start_date,
+            $end_date
+        );
+
+        $results = $wpdb->get_results( $query, ARRAY_A );
+
+        // Format the data for easier consumption
+        $formatted_data = array();
+        foreach ( $results as $row ) {
+            $date = $row['event_date'];
+            if ( ! isset( $formatted_data[ $date ] ) ) {
+                $formatted_data[ $date ] = array(
+                    'date' => $date,
+                    'impressions' => 0,
+                    'clicks' => 0,
+                    'conversions' => 0,
+                    'revenue' => 0
+                );
+            }
+
+            $formatted_data[ $date ][ $row['event_type'] . 's' ] = intval( $row['count'] );
+            if ( $row['event_type'] === 'conversion' ) {
+                $formatted_data[ $date ]['revenue'] = floatval( $row['total_revenue'] );
+            }
+        }
+
+        return array_values( $formatted_data );
+    }
+
+    /**
+     * Get performance summary for a campaign with optional date range
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format, optional)
+     * @param string $end_date End date (Y-m-d format, optional)
+     * @return array Performance summary
+     */
+    public static function upspr_get_performance_summary_by_date( $campaign_id, $start_date = null, $end_date = null ) {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+
+        // Build date filter
+        $date_filter = '';
+        $params = array( $campaign_id );
+
+        if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
+            $date_filter = 'AND event_date BETWEEN %s AND %s';
+            $params[] = $start_date;
+            $params[] = $end_date;
+        }
+
+        $query = $wpdb->prepare(
+            "SELECT
+                event_type,
+                COUNT(*) as count,
+                SUM(revenue) as total_revenue
+            FROM {$analytics_table}
+            WHERE campaign_id = %d
+            {$date_filter}
+            GROUP BY event_type",
+            $params
+        );
+
+        $results = $wpdb->get_results( $query, ARRAY_A );
+
+        // Initialize summary
+        $summary = array(
+            'impressions' => 0,
+            'clicks' => 0,
+            'conversions' => 0,
+            'revenue' => 0,
+            'ctr' => 0,
+            'conversion_rate' => 0,
+            'aov' => 0
+        );
+
+        // Populate from results
+        foreach ( $results as $row ) {
+            $type = $row['event_type'];
+            $summary[ $type . 's' ] = intval( $row['count'] );
+            if ( $type === 'conversion' ) {
+                $summary['revenue'] = floatval( $row['total_revenue'] );
+            }
+        }
+
+        // Calculate metrics
+        if ( $summary['impressions'] > 0 ) {
+            $summary['ctr'] = ( $summary['clicks'] / $summary['impressions'] ) * 100;
+        }
+        if ( $summary['clicks'] > 0 ) {
+            $summary['conversion_rate'] = ( $summary['conversions'] / $summary['clicks'] ) * 100;
+        }
+        if ( $summary['conversions'] > 0 ) {
+            $summary['aov'] = $summary['revenue'] / $summary['conversions'];
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Get product-level performance for a campaign with optional date range
+     *
+     * @param int $campaign_id Campaign ID
+     * @param string $start_date Start date (Y-m-d format, optional)
+     * @param string $end_date End date (Y-m-d format, optional)
+     * @return array Product performance data
+     */
+    public static function upspr_get_product_performance_by_date( $campaign_id, $start_date = null, $end_date = null ) {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+
+        // Build date filter
+        $date_filter = '';
+        $params = array( $campaign_id );
+
+        if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
+            $date_filter = 'AND event_date BETWEEN %s AND %s';
+            $params[] = $start_date;
+            $params[] = $end_date;
+        }
+
+        $query = $wpdb->prepare(
+            "SELECT
+                product_id,
+                event_type,
+                COUNT(*) as count,
+                SUM(revenue) as total_revenue
+            FROM {$analytics_table}
+            WHERE campaign_id = %d
+            AND product_id IS NOT NULL
+            {$date_filter}
+            GROUP BY product_id, event_type
+            ORDER BY product_id ASC",
+            $params
+        );
+
+        $results = $wpdb->get_results( $query, ARRAY_A );
+
+        // Format the data
+        $product_data = array();
+        foreach ( $results as $row ) {
+            $product_id = $row['product_id'];
+            if ( ! isset( $product_data[ $product_id ] ) ) {
+                $product_data[ $product_id ] = array(
+                    'product_id' => $product_id,
+                    'clicks' => 0,
+                    'conversions' => 0,
+                    'revenue' => 0
+                );
+            }
+
+            if ( $row['event_type'] === 'click' ) {
+                $product_data[ $product_id ]['clicks'] = intval( $row['count'] );
+            } elseif ( $row['event_type'] === 'conversion' ) {
+                $product_data[ $product_id ]['conversions'] = intval( $row['count'] );
+                $product_data[ $product_id ]['revenue'] = floatval( $row['total_revenue'] );
+            }
+        }
+
+        return array_values( $product_data );
     }
 }

@@ -23,6 +23,8 @@
 .wp-admin {
   .upspr-admin-wrapper {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
 
     .nav-tab-wrapper {
       @apply border-b border-gray-200 mb-6;
@@ -34,6 +36,21 @@
       &.nav-tab-active {
         @apply text-green-600 border-green-600;
       }
+    }
+  }
+}
+
+// Navbar specific styles
+.upspr-admin-wrapper {
+  nav {
+    // Ensure navbar is full width and positioned correctly
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-top: -10px;
+
+    @media (max-width: 782px) {
+      margin-left: -10px;
+      margin-right: -10px;
     }
   }
 }

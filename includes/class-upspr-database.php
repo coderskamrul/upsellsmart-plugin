@@ -46,6 +46,7 @@ class UPSPR_Database {
 
         $charset_collate = $wpdb->get_charset_collate();
 
+        // Main campaigns table
         $sql = "CREATE TABLE {$this->table_name} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
@@ -72,6 +73,26 @@ class UPSPR_Database {
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         dbDelta( $sql );
+
+        // Analytics table for date-based tracking
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+        $analytics_sql = "CREATE TABLE {$analytics_table} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            campaign_id bigint(20) NOT NULL,
+            event_type varchar(20) NOT NULL,
+            product_id bigint(20) DEFAULT NULL,
+            revenue decimal(10,2) DEFAULT 0,
+            event_date date NOT NULL,
+            event_datetime datetime NOT NULL,
+            PRIMARY KEY (id),
+            KEY campaign_id (campaign_id),
+            KEY event_type (event_type),
+            KEY event_date (event_date),
+            KEY campaign_date (campaign_id, event_date),
+            KEY campaign_type_date (campaign_id, event_type, event_date)
+        ) $charset_collate;";
+
+        dbDelta( $analytics_sql );
     }
 
     /**
@@ -127,6 +148,21 @@ class UPSPR_Database {
             'revenue' => 0
         ) );
 
+        // Validate required fields
+        $required_fields = array( 'name', 'type', 'location' );
+        foreach ( $required_fields as $field ) {
+            if ( empty( $data[ $field ] ) ) {
+                error_log( "UPSPR: Missing required field: {$field}" );
+                return new WP_Error( 'missing_field', "Missing required field: {$field}", array( 'status' => 400 ) );
+            }
+        }
+
+        // Set default values for optional fields
+        $data['description'] = isset( $data['description'] ) ? $data['description'] : '';
+        $data['products_count'] = isset( $data['products_count'] ) ? intval( $data['products_count'] ) : 4;
+        $data['priority'] = isset( $data['priority'] ) ? intval( $data['priority'] ) : 1;
+        $data['status'] = isset( $data['status'] ) ? $data['status'] : 'active';
+
         $result = $wpdb->insert(
             $this->table_name,
             array(
@@ -153,7 +189,7 @@ class UPSPR_Database {
         );
 
         if ( $result === false ) {
-            return new WP_Error( 'db_error', 'Failed to create campaign', array( 'status' => 500 ) );
+            return new WP_Error( 'db_error', 'Failed to create campaign: ' . $wpdb->last_error, array( 'status' => 500 ) );
         }
 
         return $wpdb->insert_id;

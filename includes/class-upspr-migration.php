@@ -14,10 +14,11 @@ class UPSPR_Migration {
      */
     public static function upspr_run_migrations() {
         $current_version = get_option( 'upspr_db_version', '1.0.0' );
-        $target_version = '2.1.0'; // Incremented to force migration
+        $target_version = '2.2.0'; // Incremented to force migration for analytics table
 
         if ( version_compare( $current_version, $target_version, '<' ) ) {
             self::upspr_migrate_to_v2();
+            self::upspr_migrate_to_v2_2(); // Add analytics table
             update_option( 'upspr_db_version', $target_version );
         }
     }
@@ -160,6 +161,65 @@ class UPSPR_Migration {
                     ),
                     array( 'id' => $campaign->id ),
                     array( '%s', '%s', '%s', '%s', '%s' ),
+                    array( '%d' )
+                );
+            }
+        }
+    }
+
+    /**
+     * Migrate to version 2.2 - Add analytics table for date-based tracking
+     */
+    private static function upspr_migrate_to_v2_2() {
+        global $wpdb;
+
+        $analytics_table = $wpdb->prefix . 'upspr_analytics';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        // Create analytics table
+        $sql = "CREATE TABLE IF NOT EXISTS {$analytics_table} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            campaign_id bigint(20) NOT NULL,
+            event_type varchar(20) NOT NULL,
+            product_id bigint(20) DEFAULT NULL,
+            revenue decimal(10,2) DEFAULT 0,
+            event_date date NOT NULL,
+            event_datetime datetime NOT NULL,
+            PRIMARY KEY (id),
+            KEY campaign_id (campaign_id),
+            KEY event_type (event_type),
+            KEY event_date (event_date),
+            KEY campaign_date (campaign_id, event_date),
+            KEY campaign_type_date (campaign_id, event_type, event_date)
+        ) $charset_collate;";
+
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+
+        // Clean up old performance data - remove unnecessary fields
+        $campaigns_table = $wpdb->prefix . 'upspr_recommendation_campaigns';
+        $campaigns = $wpdb->get_results( "SELECT id, performance_data FROM {$campaigns_table} WHERE performance_data IS NOT NULL AND performance_data != ''" );
+
+        foreach ( $campaigns as $campaign ) {
+            $performance = json_decode( $campaign->performance_data, true );
+
+            if ( ! empty( $performance ) && is_array( $performance ) ) {
+                // Keep only essential summary fields
+                $cleaned_performance = array(
+                    'impressions' => isset( $performance['impressions'] ) ? $performance['impressions'] : 0,
+                    'clicks' => isset( $performance['clicks'] ) ? $performance['clicks'] : 0,
+                    'conversions' => isset( $performance['conversions'] ) ? $performance['conversions'] : 0,
+                    'revenue' => isset( $performance['revenue'] ) ? $performance['revenue'] : 0,
+                    'product_clicks' => isset( $performance['product_clicks'] ) ? $performance['product_clicks'] : array(),
+                    'product_conversions' => isset( $performance['product_conversions'] ) ? $performance['product_conversions'] : array()
+                );
+
+                // Update with cleaned data
+                $wpdb->update(
+                    $campaigns_table,
+                    array( 'performance_data' => wp_json_encode( $cleaned_performance ) ),
+                    array( 'id' => $campaign->id ),
+                    array( '%s' ),
                     array( '%d' )
                 );
             }
