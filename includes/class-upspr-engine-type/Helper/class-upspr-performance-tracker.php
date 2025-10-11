@@ -33,9 +33,13 @@ class UPSPR_Performance_Tracker {
         // Validate impression using campaign-specific rules
         if ( ! self::upspr_should_track_impression( $campaign_data, $product_ids ) ) {
             // Log validation failure for debugging
+            // echo '$product_ids<pre>'; print_r($product_ids); echo '</pre>';
+            // echo '$campaign_data<pre>'; print_r($campaign_data); echo '</pre>';
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                 error_log( 'UPSPR: Impression validation failed for campaign ' . $campaign_id . ' (Type: ' . ($campaign_data['type'] ?? 'unknown') . ')' );
             }
+            // echo '<pre>'; print_r('upspr_track_impression hdmd'); echo '</pre>';
+
             return false;
         }
 
@@ -46,7 +50,6 @@ class UPSPR_Performance_Tracker {
         $performance = self::upspr_get_campaign_performance( $campaign_id );
         $performance['impressions'] = isset( $performance['impressions'] ) ? $performance['impressions'] + 1 : 1;
         self::upspr_update_campaign_performance( $campaign_id, $performance );
-
         return $success;
     }
 
@@ -77,13 +80,19 @@ class UPSPR_Performance_Tracker {
         $campaign_type = $campaign_data['type'];
         $display_location = $basic_info['displayLocation'];
 
-        // Only validate cross-sell campaigns for now
-        if ( $campaign_type === 'cross-sell' ) {
-            return self::upspr_validate_cross_sell_impression( $display_location, $product_ids );
-        }
+        // Validate based on campaign type
+        switch ( $campaign_type ) {
+            case 'cross-sell':
+                return self::upspr_validate_cross_sell_impression( $display_location, $product_ids );
 
-        // Skip validation for other campaign types
-        return false;
+            case 'upsell':
+                return self::upspr_validate_upsell_impression( $display_location, $product_ids );
+
+            // Add more campaign types here as needed
+            default:
+                // For other campaign types, use basic validation
+                return ! empty( $product_ids );
+        }
     }
 
     /**
@@ -118,6 +127,71 @@ class UPSPR_Performance_Tracker {
         // For cart/checkout pages, cart must have items
         if ( function_exists( 'WC' ) && WC()->cart ) {
             if ( WC()->cart->get_cart_contents_count() === 0 ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate upsell campaign impression
+     *
+     * @param string $display_location Display location
+     * @param array $product_ids Product IDs
+     * @return bool True if valid
+     */
+    private static function upspr_validate_upsell_impression( $display_location, $product_ids ) {
+        // Upsell campaigns are valid on product, cart, and checkout pages
+        $valid_locations = array( 'product-page', 'cart-page', 'checkout-page' );
+
+        if ( ! in_array( $display_location, $valid_locations, true ) ) {
+            return false;
+        }
+
+        // Must have at least 1 product
+        if ( count( $product_ids ) < 1 ) {
+            return false;
+        }
+
+        // Check if we're actually on the correct page type
+        if ( $display_location === 'product-page' && ! is_product() ) {
+            return false;
+        }
+
+        if ( $display_location === 'cart-page' && ! is_cart() ) {
+            return false;
+        }
+
+        if ( $display_location === 'checkout-page' && ! is_checkout() ) {
+            return false;
+        }
+
+        // For product page, we need a valid product
+        if ( $display_location === 'product-page' ) {
+            global $product, $post;
+
+            // Check if we have a valid product
+            if ( ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
+                // Try to get product from post
+                if ( is_object( $post ) && $post->post_type === 'product' ) {
+                    $product = wc_get_product( $post->ID );
+                    if ( ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        // For cart/checkout pages, cart must have items
+        if ( in_array( $display_location, array( 'cart-page', 'checkout-page' ), true ) ) {
+            if ( function_exists( 'WC' ) && WC()->cart ) {
+                if ( WC()->cart->get_cart_contents_count() === 0 ) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         }
