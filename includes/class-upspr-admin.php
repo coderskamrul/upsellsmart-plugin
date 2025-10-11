@@ -104,6 +104,48 @@ class UPSPR_Admin {
             window.upspr_ajax = window.upspr_ajax || {};
             window.upspr_ajax.nonce = "' . wp_create_nonce( 'upspr_admin_nonce' ) . '";
         ', 'before' );
+
+        // Add script to intercept WordPress menu clicks for client-side routing
+        wp_add_inline_script( 'upspr-admin', '
+            document.addEventListener("DOMContentLoaded", function() {
+                // Intercept WordPress admin menu clicks
+                const menuItems = document.querySelectorAll("#adminmenu a[href*=\"page=upsellsmart\"]");
+
+                menuItems.forEach(function(menuItem) {
+                    menuItem.addEventListener("click", function(e) {
+                        const href = this.getAttribute("href");
+
+                        // Only intercept our plugin pages
+                        if (href && href.includes("page=upsellsmart")) {
+                            e.preventDefault();
+
+                            // Determine which page to navigate to
+                            let targetPage = "dashboard";
+                            if (href.includes("upsellsmart-recommendations")) {
+                                targetPage = "recommendations";
+                            } else if (href.includes("upsellsmart-settings")) {
+                                targetPage = "settings";
+                            } else if (href.includes("upsellsmart-test")) {
+                                targetPage = "test";
+                            }
+
+                            // Update hash for client-side routing
+                            window.location.hash = targetPage;
+
+                            // Update active menu item
+                            document.querySelectorAll("#adminmenu .current").forEach(function(el) {
+                                el.classList.remove("current");
+                            });
+                            this.parentElement.classList.add("current");
+
+                            // Update URL without reload
+                            const baseUrl = href.split("#")[0];
+                            window.history.replaceState(null, "", baseUrl + "#" + targetPage);
+                        }
+                    });
+                });
+            });
+        ', 'after' );
     }
 
     /**

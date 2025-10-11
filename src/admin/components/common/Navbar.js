@@ -17,12 +17,9 @@ const Navbar = ({ currentPage, onNavigate }) => {
   ]
 
   const handleNavClick = (itemId) => {
-    if (itemId === 'dashboard') {
-      window.location.href = 'admin.php?page=upsellsmart'
-    } else if (itemId === 'recommendations') {
-      window.location.href = 'admin.php?page=upsellsmart-recommendations'
-    } else if (itemId === 'settings') {
-      window.location.href = 'admin.php?page=upsellsmart-settings'
+    // Use the onNavigate callback instead of page reload
+    if (onNavigate) {
+      onNavigate(itemId)
     }
     setMobileMenuOpen(false)
     setMoreMenuOpen(false)
@@ -61,11 +58,10 @@ const Navbar = ({ currentPage, onNavigate }) => {
                     <button
                       key={item.id}
                       onClick={() => handleNavClick(item.id)}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                        isActive(item.id)
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isActive(item.id)
                           ? 'bg-green-50 text-green-700'
                           : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4 w-4" />
                       {item.label}
@@ -158,11 +154,10 @@ const Navbar = ({ currentPage, onNavigate }) => {
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${
-                    isActive(item.id)
+                  className={`w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${isActive(item.id)
                       ? 'bg-green-50 text-green-700'
                       : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-5 w-5" />
                   {item.label}
