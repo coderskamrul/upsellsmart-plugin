@@ -30,9 +30,9 @@ const Navbar = ({ currentPage, onNavigate }) => {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white border-b border-gray-200 sticky top-4 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo and Brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
@@ -59,8 +59,8 @@ const Navbar = ({ currentPage, onNavigate }) => {
                       key={item.id}
                       onClick={() => handleNavClick(item.id)}
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isActive(item.id)
-                          ? 'bg-green-50 text-green-700'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -155,8 +155,8 @@ const Navbar = ({ currentPage, onNavigate }) => {
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
                   className={`w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 ${isActive(item.id)
-                      ? 'bg-green-50 text-green-700'
-                      : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-green-50 text-green-700'
+                    : 'text-gray-700 hover:bg-gray-50'
                     }`}
                 >
                   <Icon className="h-5 w-5" />
